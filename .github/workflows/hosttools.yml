@@ -29,7 +29,7 @@ jobs:
       run: |
         # for demo
         # date >foo.txt && mkdir bar ; date >bar/bar.txt 
-        tools/dl-toolchains_make
+        tools/dl-hosttools
 
     - name: Get current date
       id: date
@@ -41,5 +41,5 @@ jobs:
         artifacts: "dl/*"
         # variable has content but 40 chars of hex are not allowed by "release"
         # tag: ${{ github.sha }}
-        tag: toolchain-${{ steps.date.outputs.date }}
+        tag: hosttools-${{ steps.date.outputs.date }}
         token: ${{ secrets.GITHUB_TOKEN }}
