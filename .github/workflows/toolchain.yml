@@ -13,9 +13,6 @@ on:
 jobs:  
   build:
     runs-on: ubuntu-latest
-    # needed to create release?
-    permissions:
-      contents: write
     container: 
       image: pfichtner/freetz:latest
       options: --user 1001
