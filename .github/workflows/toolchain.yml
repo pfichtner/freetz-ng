@@ -33,15 +33,18 @@ jobs:
 
     - name: Build toolchain
       run: |
-        cd freetz-ng && date >foo.txt && mkdir bar ; date >bar/bar.txt 
-        # cd freetz-ng && tools/dl-toolchains_make
+        # for demo
+        # cd freetz-ng && date >foo.txt && mkdir bar ; date >bar/bar.txt 
+        cd freetz-ng && tools/dl-toolchains_make
 
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "freetz-ng/foo.txt,freetz-ng/bar/*.txt"
+        # for demo
+        # artifacts: "freetz-ng/foo.txt,freetz-ng/bar/*.txt"
+        artifacts: "dl/*"
         # variable has content but 40 chars of hex are not allowed by "release"
         # tag: ${{ github.sha }}
         tag: release-${{ steps.date.outputs.date }}
