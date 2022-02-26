@@ -1,4 +1,4 @@
-name: Freetz-NG CI
+name: Freetz-NG toolchain build
 
 on:
   push:
