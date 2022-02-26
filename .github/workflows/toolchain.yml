@@ -18,24 +18,18 @@ jobs:
       options: --user 1001
     steps:
     - uses: actions/checkout@v2
-      with:
-        repository: 'Freetz-NG/freetz-ng'
-        path: 'freetz-ng'
-    - uses: actions/checkout@v2
-      with:
-        path: 'configs'
     - name: Cache downloads
       id: cache-downloads
       uses: actions/cache@v2
       with:
-        path: freetz-ng/dl
+        path: .freetz-dl
         key: ${{ runner.os }}-downloads
 
     - name: Build toolchain
       run: |
         # for demo
-        # cd freetz-ng && date >foo.txt && mkdir bar ; date >bar/bar.txt 
-        cd freetz-ng && tools/dl-toolchains_make
+        # date >foo.txt && mkdir bar ; date >bar/bar.txt 
+        tools/dl-hosttools
 
     - name: Get current date
       id: date
@@ -43,7 +37,7 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         # for demo
-        # artifacts: "freetz-ng/foo.txt,freetz-ng/bar/*.txt"
+        # artifacts: "foo.txt,bar/*.txt"
         artifacts: "dl/*"
         # variable has content but 40 chars of hex are not allowed by "release"
         # tag: ${{ github.sha }}
