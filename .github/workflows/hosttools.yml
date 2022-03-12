@@ -12,9 +12,9 @@ on:
   
 jobs:  
   build:
-    runs-on: ubuntu:14.04
+    runs-on: ubuntu-latest
     container: 
-      image: pfichtner/freetz:latest
+      image: ubuntu:14.04
       options: --user 1001
     steps:
     - name: Install prerequisites
@@ -34,7 +34,6 @@ jobs:
                    libusb-dev unzip intltool libacl1-dev libcap-dev libc6-dev-i386 \
                    lib32ncurses5-dev gcc-multilib lib32stdc++6 libglib2.0-dev \
                    libxml2-dev cpio
-
     - uses: actions/checkout@v2
     - name: Cache downloads
       id: cache-downloads
