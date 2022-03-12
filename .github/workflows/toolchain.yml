@@ -14,8 +14,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: pfichtner/freetz:latest
-      options: --user 1001
+      image: ubuntu:14.04
+    steps:
+    - name: Install prerequisites
+      run: |
+        apt-get -y update && \
+        apt-get -y upgrade && \
+        apt-get -y dist-upgrade && \
+        DEBIAN_FRONTEND=noninteractive apt-get -y install \
+                   wget inkscape bc \
+                   rsync kmod execstack sqlite3 libsqlite3-dev \
+                   cmake lib32z1-dev unar inkscape imagemagick \
+                   subversion git bc wget sudo ccache gcc g++ binutils autoconf automake \
+                   autopoint libtool make bzip2 libncurses5-dev libreadline-dev \
+                   zlib1g-dev flex bison patch texinfo tofrodos gettext pkg-config sharutils \
+                   ecj fastjar perl libstring-crc32-perl ruby gawk python \
+                   bsdmainutils sudo locales \
+                   libusb-dev unzip intltool libacl1-dev libcap-dev libc6-dev-i386 \
+                   lib32ncurses5-dev gcc-multilib lib32stdc++6 libglib2.0-dev \
+                   libxml2-dev cpio
     steps:
     - uses: actions/checkout@v2
     - name: Cache downloads
@@ -25,11 +42,16 @@ jobs:
         path: .freetz-dl
         key: ${{ runner.os }}-downloads
 
+    # Ubuntu 14.04 comes with make version 3.81, Makefile checks for at least version 3.82
+    - name: Remove make version check from Makefile
+      run: sed -ie '/MAKE_VERSION/,+2d' Makefile
+    - name: Create freetz-builduser
+      run: useradd freetz-builduser && chown -R freetz-builduser .
     - name: Build toolchain
       run: |
         # for demo
         # date >foo.txt && mkdir bar ; date >bar/bar.txt 
-        tools/dl-toolchains_make
+        su freetz-builduser -c tools/dl-toolchains_make
 
     - name: Get current date
       id: date
