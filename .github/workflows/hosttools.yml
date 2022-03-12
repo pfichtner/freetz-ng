@@ -12,11 +12,29 @@ on:
   
 jobs:  
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu:14.04
     container: 
       image: pfichtner/freetz:latest
       options: --user 1001
     steps:
+    - name: Install prerequisites
+      run: |
+        apt-get -y update && \
+        apt-get -y upgrade && \
+        apt-get -y dist-upgrade && \
+        DEBIAN_FRONTEND=noninteractive apt-get -y install \
+                   wget inkscape bc \
+                   rsync kmod execstack sqlite3 libsqlite3-dev \
+                   cmake lib32z1-dev unar inkscape imagemagick \
+                   subversion git bc wget sudo ccache gcc g++ binutils autoconf automake \
+                   autopoint libtool make bzip2 libncurses5-dev libreadline-dev \
+                   zlib1g-dev flex bison patch texinfo tofrodos gettext pkg-config sharutils \
+                   ecj fastjar perl libstring-crc32-perl ruby gawk python \
+                   bsdmainutils sudo locales \
+                   libusb-dev unzip intltool libacl1-dev libcap-dev libc6-dev-i386 \
+                   lib32ncurses5-dev gcc-multilib lib32stdc++6 libglib2.0-dev \
+                   libxml2-dev cpio
+
     - uses: actions/checkout@v2
     - name: Cache downloads
       id: cache-downloads
