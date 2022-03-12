@@ -34,7 +34,7 @@ jobs:
                    lib32ncurses5-dev gcc-multilib lib32stdc++6 libglib2.0-dev \
                    libxml2-dev cpio
     - name: Set umask before checkout
-      run: echo "umask 0022" >>/etc/profile
+      run: echo "umask 0022" >>/etc/bash.bashrc
     - uses: actions/checkout@v2
     - name: Cache downloads
       id: cache-downloads
