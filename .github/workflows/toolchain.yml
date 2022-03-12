@@ -42,9 +42,6 @@ jobs:
         path: .freetz-dl
         key: ${{ runner.os }}-downloads
 
-    # Ubuntu 14.04 comes with make version 3.81, Makefile checks for at least version 3.82
-    - name: Remove make version check from Makefile
-      run: sed -ie '/MAKE_VERSION/,+2d' Makefile
     - name: Create freetz-builduser
       run: useradd freetz-builduser && chown -R freetz-builduser .
     - name: Build toolchain
