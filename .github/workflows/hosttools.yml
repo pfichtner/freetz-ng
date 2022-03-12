@@ -33,7 +33,11 @@ jobs:
                    libusb-dev unzip intltool libacl1-dev libcap-dev libc6-dev-i386 \
                    lib32ncurses5-dev gcc-multilib lib32stdc++6 libglib2.0-dev \
                    libxml2-dev cpio \
-                   realpath
+                   realpath && \
+                   # remove expired certificates 
+                   cp /etc/ca-certificates.conf /etc/ca-certificates.conf.orig && \
+                   cat /etc/ca-certificates.conf.orig | sed 's|mozilla/DST_Root_CA_X3.crt|!mozilla//DST_Root_CA_X3.crt|g' > /etc/ca-certificates.conf && \
+                   dpkg-reconfigure -fnoninteractive ca-certificates
     - uses: actions/checkout@v2
     # Ubuntu 14.04 comes with make version 3.81, Makefile checks for at least version 3.82
     - name: Remove make version check from Makefile
