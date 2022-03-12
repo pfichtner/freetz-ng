@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     container: 
       image: ubuntu:14.04
-      options: --user 1001
     steps:
     - name: Install prerequisites
       run: |
