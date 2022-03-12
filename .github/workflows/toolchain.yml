@@ -32,7 +32,8 @@ jobs:
                    bsdmainutils sudo locales \
                    libusb-dev unzip intltool libacl1-dev libcap-dev libc6-dev-i386 \
                    lib32ncurses5-dev gcc-multilib lib32stdc++6 libglib2.0-dev \
-                   libxml2-dev cpio
+                   libxml2-dev cpio \
+                   realpath
     - uses: actions/checkout@v2
     - name: Cache downloads
       id: cache-downloads
