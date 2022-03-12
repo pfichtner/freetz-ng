@@ -25,7 +25,7 @@ jobs:
         path: .freetz-dl
         key: ${{ runner.os }}-downloads
 
-    - name: Build toolchain
+    - name: Build hosttools
       run: |
         # for demo
         # date >foo.txt && mkdir bar ; date >bar/bar.txt 
