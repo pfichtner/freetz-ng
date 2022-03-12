@@ -49,7 +49,7 @@ jobs:
       run: |
         # for demo
         # date >foo.txt && mkdir bar ; date >bar/bar.txt 
-        find -type d -exec chmod 755 {} \; && umask 0022 && su freetz-builduser -c tools/dl-hosttools
+        find -type d -exec chmod 755 {} \; && su freetz-builduser -c "umask 0022 && tools/dl-hosttools"
 
     - name: Get current date
       id: date
