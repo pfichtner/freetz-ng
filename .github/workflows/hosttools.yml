@@ -45,7 +45,7 @@ jobs:
     - name: Remove make version check from Makefile
       run: sed -ie '/MAKE_VERSION/,+2d' Makefile
     - name: Create freetz-builduser
-      run: useradd freetz-builduser && chown -R freetz-builduser .
+      run: useradd -m freetz-builduser && chown -R freetz-builduser .
     - name: Build hosttools
       run: |
         # for demo
