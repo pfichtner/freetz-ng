@@ -18,7 +18,6 @@ jobs:
     steps:
     - name: Install prerequisites
       run: |
-        echo "umask 0022" >>/etc/profile && \
         apt-get -y update && \
         apt-get -y upgrade && \
         apt-get -y dist-upgrade && \
@@ -50,7 +49,7 @@ jobs:
       run: |
         # for demo
         # date >foo.txt && mkdir bar ; date >bar/bar.txt 
-        su freetz-builduser -c tools/dl-hosttools
+        find -type d -exec chmod 755 {} \; && umask 0022 && su freetz-builduser -c tools/dl-hosttools
 
     - name: Get current date
       id: date
