@@ -16,34 +16,70 @@ config() {
 	fi
 }
 
+write_mww_files() {
+HTTP_CONFIG_HOSTNAME="http://$TINYPROXY_HOSTNAME"
+
+MWW_CONF="/var/lib/tinyproxy_mww"
+mkdir -p "$MWW_CONF"
+MWW_HTDOCS="$MWW_CONF/htdocs"
+mkdir -p "$MWW_HTDOCS"
+
+cat << EOF >"$MWW_CONF/httpd.conf"
+.pac:application/x-ns-proxy-autoconfig
+EOF
+
+cat << EOF >"$MWW_HTDOCS/proxy.pac"
+function FindProxyForURL(url, host) {
+        if ((url.substring(0,5) == "http:" || url.substring(0,6) == "https:") && url.substring(0,${#HTTP_CONFIG_HOSTNAME}) != "$HTTP_CONFIG_HOSTNAME") {
+                return "PROXY $TINYPROXY_HOSTNAME:$TINYPROXY_PORT";
+        }
+        else {
+                return "DIRECT";
+        }
+}
+EOF
+
+# for backward compatiblity create the previous existing proxy.cgi
+MWW_CGI_BIN="$MWW_HTDOCS/cgi-bin"
+mkdir -p "$MWW_CGI_BIN"
+cat << EOF >"$MWW_CGI_BIN/proxy.cgi"
+#!/bin/sh
+cat << EOF
+Status: 302 Moved
+Location: /proxy.pac
+EOF
+chmod +x "$MWW_CGI_BIN/proxy.cgi"
+}
+
 start() {
 	modlib_startdaemon $DAEMON -c $DAEMON_CONFIG
 }
 
 start_addons() {
-	if [ "$TINYPROXY_CATCHALL" == "yes" ]; then
-		echo -n " -- Redirect HTTP (Port 80) to tinyproxy (iptables) ... "
-		/usr/sbin/iptables -t nat -A PREROUTING -i lan -p tcp --dport 80 -j REDIRECT --to-port $TINYPROXY_PORT
-		exitval=$?
-		if [ "$exitval" -eq 0 ]; then
-			echo 'done.'
-		else
-			echo 'failed.'
-		fi
+        if [ "$TINYPROXY_CATCHALL" == "yes" ]; then
+                echo -n " -- Redirect HTTP (Port 80) to tinyproxy (iptables) ... "
+                /usr/sbin/iptables -t nat -A PREROUTING -i lan -p tcp --dport 80 -j REDIRECT --to-port $TINYPROXY_PORT
+                exitval=$?
+                if [ "$exitval" -eq 0 ]; then
+                        echo 'done.'
+                else
+                        echo 'failed.'
+                fi
 
-	fi
+        fi
 
-	if [ "$TINYPROXY_CONFSERVER" == "yes" ]; then
-		echo -n " -- Starting the webserver for the proxy config file ... "
-		httpd -p $TINYPROXY_CONFSERVERPORT -h /usr/mww_tinyproxy
-		exitval=$?
-		if [ "$exitval" -eq 0 ]; then
-			echo 'done.'
-		else
-			echo 'failed.'
-		fi
+        if [ "$TINYPROXY_CONFSERVER" == "yes" ]; then
+		write_mww_files
 
-	fi
+                echo -n " -- Starting the webserver for the proxy config file ... "
+                httpd -p $TINYPROXY_CONFSERVERPORT -c "$MWW_CONF/httpd.conf" -h "$MWW_HTDOCS"
+                exitval=$?
+                if [ "$exitval" -eq 0 ]; then
+                        echo 'done.'
+                else
+                        echo 'failed.'
+                fi
+        fi
 }
 
 stop_addons() {
