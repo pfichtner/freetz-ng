@@ -1,0 +1,64 @@
+name: Freetz-NG hosttools build
+
+on:
+  push:
+    paths:
+      - 'toolchain/**'
+      - '.github/**'
+  pull_request:
+    paths:
+      - 'toolchain/**'
+      - '.github/**'
+  
+jobs:  
+  build:
+    runs-on: ubuntu-latest
+    container: 
+      image: ubuntu:14.04
+    steps:
+    - name: Install prerequisites
+      run: |
+        apt-get -y update && \
+        apt-get -y upgrade && \
+        apt-get -y dist-upgrade && \
+        DEBIAN_FRONTEND=noninteractive apt-get -y install \
+                   wget inkscape bc \
+                   rsync kmod execstack sqlite3 libsqlite3-dev \
+                   cmake lib32z1-dev unar inkscape imagemagick \
+                   subversion git bc wget sudo ccache gcc g++ binutils autoconf automake \
+                   autopoint libtool make bzip2 libncurses5-dev libreadline-dev \
+                   zlib1g-dev flex bison patch texinfo tofrodos gettext pkg-config sharutils \
+                   ecj fastjar perl libstring-crc32-perl ruby gawk python \
+                   bsdmainutils sudo locales \
+                   libusb-dev unzip intltool libacl1-dev libcap-dev libc6-dev-i386 \
+                   lib32ncurses5-dev gcc-multilib lib32stdc++6 libglib2.0-dev \
+                   libxml2-dev cpio \
+                   realpath && \
+                   # remove expired certificates 
+                   cp /etc/ca-certificates.conf /etc/ca-certificates.conf.orig && \
+                   cat /etc/ca-certificates.conf.orig | sed 's|mozilla/DST_Root_CA_X3.crt|!mozilla//DST_Root_CA_X3.crt|g' > /etc/ca-certificates.conf && \
+                   dpkg-reconfigure -fnoninteractive ca-certificates
+    - uses: actions/checkout@v2
+    # Ubuntu 14.04 comes with make version 3.81, Makefile checks for at least version 3.82
+    - name: Remove make version check from Makefile
+      run: sed -ie '/MAKE_VERSION/,+2d' Makefile
+    - name: Create freetz-builduser
+      run: useradd -m freetz-builduser && chown -R freetz-builduser .
+    - name: Build hosttools
+      run: |
+        # for demo
+        # date >foo.txt && mkdir bar ; date >bar/bar.txt 
+        find -type d -exec chmod 755 {} \; && su freetz-builduser -c "umask 0022 && tools/dl-hosttools"
+
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+    - uses: ncipollo/release-action@v1
+      with:
+        # for demo
+        # artifacts: "foo.txt,bar/*.txt"
+        artifacts: "dl/*"
+        # variable has content but 40 chars of hex are not allowed by "release"
+        # tag: ${{ github.sha }}
+        tag: hosttools-${{ steps.date.outputs.date }}
+        token: ${{ secrets.GITHUB_TOKEN }}
