@@ -100,7 +100,7 @@ Index:
 
 ### C
 
-  * **[CA-bundle 2022-03-18](ca-bundle.md)<a id='ca-bundle'></a>**<br>
+  * **[CA-bundle 2022-03-29](ca-bundle.md)<a id='ca-bundle'></a>**<br>
     The Mozilla CA certificate store in PEM format, see https://www.curl.se/docs/caextract.html Size of uncompressed file is about 250 KB.
 
   * **[Callmonitor 1.20.9-git](callmonitor.md)<a id='callmonitor'></a>**<br>
@@ -237,7 +237,7 @@ Index:
   * **<u>GNU Make 4.2.1 (binary only)</u><a id='gnu-make'></a>**<br>
     Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files.
 
-  * **<u>GnuTLS 3.6.16 (binary only)</u><a id='gnutls'></a>**<br>
+  * **[GnuTLS 3.6.16 (binary only)](gnutls.md)<a id='gnutls'></a>**<br>
     GnuTLS is a project that aims to develop a library which provides a secure layer, over a reliable transport layer. Currently the GnuTLS library implements TLS 1.3, 1.2, 1.1, 1.0 protocols and SSL 3.0.
 
   * **<u>gocr 0.49 (binary only)</u><a id='gocr'></a>**<br>
@@ -248,7 +248,7 @@ Index:
 
 ### H
 
-  * **[HAProxy 2.5.4](haproxy.md)<a id='haproxy'></a>**<br>
+  * **[HAProxy 2.5.5](haproxy.md)<a id='haproxy'></a>**<br>
     HAProxy is a free, very fast and reliable solution offering high availability, load balancing, and proxying for TCP and HTTP-based applications.
 
   * **[haserl 0.9.35 (binary only)](haserl.md)<a id='haserl'></a>**<br>
@@ -658,7 +658,7 @@ Index:
   * **<u>sshfs-fuse 2.4 (binary only)</u><a id='sshfs-fuse'></a>**<br>
     This is a filesystem client based on the SSH File Transfer Protocol. Since most SSH servers already support this protocol it is very easy to set up: i.e. on the server side there's nothing to do. On the client side mounting the filesystem is as easy as logging into the server with ssh.
 
-  * **<u>sslh 1.19c</u><a id='sslh'></a>**<br>
+  * **[sslh 1.22c](sslh.md)<a id='sslh'></a>**<br>
     sslh accepts HTTPS, SSH and OpenVPN connections on the same port. This makes it possible to connect to an SSH server or an OpenVPN on port 443 (e.g. from inside a corporate firewall, which almost never block port 443) while still serving HTTPS on that port.
 
   * **[Streamripper 1.64.6](streamripper.md)<a id='streamripper'></a>**<br>
@@ -822,7 +822,7 @@ Index:
   * **[pciutils 3.1.7 (binary only)](pciutils.md)<a id='pciutils'></a>**<br>
     The PCI Utilities are a collection of programs for inspecting and manipulating configuration of PCI devices, all based on a common portable library libpci which offers access to the PCI configuration space on a variety of operating systems. lspci displays detailed information about all PCI buses and devices in the system. setpci allows reading from and writing to PCI device configuration registers. For example, you can adjust the latency timers with it.
 
-  * **[strace 4.9/5.0/5.16 (binary only)](strace.md)<a id='strace'></a>**<br>
+  * **[strace 4.9/5.0/5.17 (binary only)](strace.md)<a id='strace'></a>**<br>
     strace - trace system calls and signals strace is a system call tracer, i.e. a debugging tool which prints out a trace of all the system calls made by a another process/program.
 
   * **<u>target-tester: #target-tester</u><a id='target-tester'></a>**<br>
