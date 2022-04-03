@@ -4,4 +4,4 @@ config EXTERNAL_FREETZ_PACKAGE_DNSCRYPT_PROXY
 	default n
 	help
 		externals the following file(s):
-		 /usr/bin/dnscrypt
+		 /usr/bin/dnscrypt-proxy
