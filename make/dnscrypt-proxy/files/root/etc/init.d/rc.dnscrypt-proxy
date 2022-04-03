@@ -1,0 +1,52 @@
+#!/bin/sh
+
+DAEMON=dnscrypt-proxy
+. /etc/init.d/modlibrc
+
+
+config() {
+	modlib_config
+}
+
+start() {
+	# -pidfile	-service [start|stop|restart]	-syslog
+	# $DNSCRYPTPROXY_LOG_SYSLOG
+	modlib_startdaemon $DAEMON -config /mod/etc/dnscrypt-proxy.toml
+}
+
+case "$1" in
+	""|load)
+		modlib_defaults
+
+		modreg cgi $DAEMON "$DAEMON"
+		modreg daemon $DAEMON
+		# modreg file $DAEMON shares "$(lang de:"Freigaben" en:"Shares")" 1 "shares"
+		# modreg file $DAEMON sharesx "$(lang de:"Erweitert" en:"Options")" 1 "sharesx"
+
+		modlib_start $DNSCRYPTPROXY_ENABLED
+		;;
+	unload)
+		modunreg file $DAEMON
+		modunreg daemon $DAEMON
+		modunreg cgi $DAEMON
+		modlib_stop
+		;;
+	start)
+		modlib_start
+		;;
+	stop)
+		modlib_stop
+		;;
+	restart)
+		modlib_restart
+		;;
+	status)
+		modlib_status
+		;;
+	*)
+		echo "Usage: $0 [load|unload|start|stop|restart|reload|status]" 1>&2
+		exit 1
+		;;
+esac
+
+exit 0
