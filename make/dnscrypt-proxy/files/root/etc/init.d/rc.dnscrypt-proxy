@@ -11,7 +11,7 @@ config() {
 start() {
 	# -pidfile	-service [start|stop|restart]	-syslog
 	# $DNSCRYPTPROXY_LOG_SYSLOG
-	modlib_startdaemon $DAEMON -config /mod/etc/dnscrypt-proxy.toml
+	modlib_startdaemon $DAEMON /mod/etc/dnscrypt-proxy.conf
 }
 
 case "$1" in
@@ -20,8 +20,6 @@ case "$1" in
 
 		modreg cgi $DAEMON "$DAEMON"
 		modreg daemon $DAEMON
-		# modreg file $DAEMON shares "$(lang de:"Freigaben" en:"Shares")" 1 "shares"
-		# modreg file $DAEMON sharesx "$(lang de:"Erweitert" en:"Options")" 1 "sharesx"
 
 		modlib_start $DNSCRYPTPROXY_ENABLED
 		;;
