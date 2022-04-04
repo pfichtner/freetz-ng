@@ -32,6 +32,7 @@ menu "Crypto & SSL"
 	comment "Misc -----------------------------------"
 		source "make/libs/gsasl/Config.in"
 		source "make/libs/libssh2/Config.in"
+		source "make/libs/libsodium/Config.in"
 endmenu ### "Crypto & SSL"
 
 menu "Data compression"
