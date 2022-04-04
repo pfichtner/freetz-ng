@@ -11,7 +11,7 @@ config() {
 start() {
 	# -pidfile	-service [start|stop|restart]	-syslog
 	# $DNSCRYPTPROXY_LOG_SYSLOG
-	modlib_startdaemon $DAEMON /mod/etc/dnscrypt-proxy.conf
+	modlib_startdaemon $DAEMON /mod/etc/dnscryptproxy.conf
 }
 
 case "$1" in
