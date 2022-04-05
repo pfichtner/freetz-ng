@@ -16,7 +16,7 @@ cat << EOF
 <br><font size="-2">$(lang de:"z.B. 192.168.178.1#53 oder leer lassen f&uuml;r alle" en:"e.g. 192.168.178.1#53 or leave blank for all")</font>
 </p>
 
-<p>$(lang de:"Anzahl Verbindungen" en:"Max connections"): <input type="text" name="maxclients" size="5" maxlength="5" value="$(html "$DNSCRYPTPROXY_MAXCLIENTS")"></p>
+<p>$(lang de:"Anzahl Verbindungen" en:"Max connections"): <input type="text" name="maxcon" size="5" maxlength="5" value="$(html "$DNSCRYPTPROXY_MAXCLIENTS")"></p>
 
 <p>
 <input id="p1" type="radio" name="log_syslog" value="yes"$log_syslog_yes_chk><label for="x1">$(lang de:"Syslog" en:"Syslog")</label>
