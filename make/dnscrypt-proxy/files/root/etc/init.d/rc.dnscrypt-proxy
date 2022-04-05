@@ -19,7 +19,7 @@ case "$1" in
 		modreg cgi $DAEMON "$DAEMON"
 		modreg daemon $DAEMON
 
-		modlib_start $DNSCRYPTPROXY_ENABLED
+		modlib_start $DNSCRYPT_PROXY_ENABLED
 		;;
 	unload)
 		modunreg file $DAEMON

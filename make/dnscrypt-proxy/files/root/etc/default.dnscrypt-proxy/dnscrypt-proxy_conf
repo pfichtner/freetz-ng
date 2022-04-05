@@ -67,7 +67,7 @@ PidFile /var/run/dnscrypt-proxy.pid
 
 EOF
 
-echo "LocalAddress $DNSCRYPTPROXY_BINDADDRESS"
+echo "LocalAddress $DNSCRYPT_PROXY_BINDADDRESS"
 
 cat << EOF
 
@@ -90,7 +90,7 @@ EphemeralKeys off
 
 EOF
 
-echo "MaxActiveRequests $DNSCRYPTPROXY_MAXCLIENTS"
+echo "MaxActiveRequests $DNSCRYPT_PROXY_MAXCLIENTS"
 
 cat << EOF
 
