@@ -4,5 +4,5 @@ default
 { en }
 files
 {
-	usr/lib/cgi-bin/dnscryptproxy.cgi
+	usr/lib/cgi-bin/dnscrypt-proxy.cgi
 }
