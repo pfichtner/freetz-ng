@@ -1,6 +1,7 @@
 #!/bin/sh
 
 DAEMON=dnscrypt-proxy
+DAEMON_LONG_NAME=DNSCrypt-Proxy
 . /etc/init.d/modlibrc
 
 
@@ -16,7 +17,7 @@ case "$1" in
 	""|load)
 		modlib_defaults
 
-		modreg cgi $DAEMON "$DAEMON"
+		modreg cgi $DAEMON "$DAEMON_LONG_NAME"
 		modreg daemon $DAEMON
 
 		modlib_start $DNSCRYPT_PROXY_ENABLED
