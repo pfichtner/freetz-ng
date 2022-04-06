@@ -74,7 +74,7 @@ cat << "EOF"
 ## Cache DNS responses to avoid outgoing traffic when the same queries
 ## are repeated multiple times in a row.
 
-LocalCache on
+# LocalCache on
 
 
 ## Creates a new key pair for every query.
