@@ -1,5 +1,5 @@
 $(call PKG_INIT_LIB, 1.0.17)
-$(PKG)_LIB_VERSION:=1.0.17
+$(PKG)_LIB_VERSION:=$($(PKG)_VERSION)
 $(PKG)_SOURCE:=$(pkg)-$($(PKG)_VERSION).tar.gz
 $(PKG)_SOURCE_MD5:=37b18839e57e7a62834231395c8e962b
 $(PKG)_SITE:=https://download.libsodium.org/libsodium/releases/
