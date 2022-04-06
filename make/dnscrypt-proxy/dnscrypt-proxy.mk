@@ -8,16 +8,14 @@ $(PKG)_TARGET_BINARY:=$($(PKG)_DEST_DIR)/usr/bin/dnscrypt-proxy
 
 $(PKG)_DEPENDS_ON += libsodium
 
-$(PKG)_CONFIGURE_PRE_CMDS += ./autogen.sh;
+$(PKG)_CONFIGURE_PRE_CMDS += $(AUTORECONF)
+$(PKG)_CONFIGURE_PRE_CMDS += $(call PKG_PREVENT_RPATH_HARDCODING,./configure)
 
-$(PKG)_CONFIGURE_DEFOPTS := n
-$(PKG)_CONFIGURE_ENV += CC="$(TARGET_CC)"
-$(PKG)_CONFIGURE_ENV += CFLAGS="$(TARGET_CFLAGS)"
-$(PKG)_CONFIGURE_ENV += LDFLAGS="$(TARGET_LDFLAGS)"
-$(PKG)_CONFIGURE_ENV += AR="$(TARGET_AR)"
-$(PKG)_CONFIGURE_ENV += RANLIB="$(TARGET_RANLIB)"
-$(PKG)_CONFIGURE_ENV += NM="$(TARGET_NM)"
-$(PKG)_CONFIGURE_OPTIONS += --host "$(GNU_TARGET_NAME)" --disable-largefile --prefix=/usr --enable-plugins
+$(PKG)_CONFIGURE_OPTIONS += --disable-rpath
+$(PKG)_CONFIGURE_OPTIONS += --host "$(GNU_TARGET_NAME)"
+$(PKG)_CONFIGURE_OPTIONS += --disable-largefile
+$(PKG)_CONFIGURE_OPTIONS += --prefix=/usr
+$(PKG)_CONFIGURE_OPTIONS += --enable-plugins
 #$(PKG)_CONFIGURE_OPTIONS += --with-included-ltdl
 
 $(PKG)_RESOLVERS_FILE:=$($(PKG)_DIR)/dnscrypt-resolvers.csv
@@ -27,11 +25,9 @@ $(PKG_SOURCE_DOWNLOAD)
 $(PKG_UNPACKED)
 $(PKG_CONFIGURED_CONFIGURE)
 
+
 $($(PKG)_BINARY): $($(PKG)_DIR)/.configured
-	$(SUBMAKE) -C $(DNSCRYPT_PROXY_DIR) \
-                EXTRA_CFLAGS="$(WGET_EXTRA_CFLAGS)" \
-                EXTRA_LDFLAGS="$(WGET_EXTRA_LDFLAGS)" \
-                EXTRA_LIBS="$(WGET_STATIC_LIBS)"
+	$(SUBMAKE) -C $(DNSCRYPT_PROXY_DIR)
 
 $($(PKG)_TARGET_BINARY): $($(PKG)_BINARY)
 	$(INSTALL_BINARY_STRIP)
