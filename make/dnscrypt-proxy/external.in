@@ -12,4 +12,4 @@ config EXTERNAL_FREETZ_PACKAGE_DNSCRYPT_PROXY_CSV
 	default n
 	help
 		externals the following file(s):
-                 /usr/share/dnscrypt-proxy/dnscrypt-resolvers.csv
+                 /var/media/ftp/dnscrypt-resolvers.csv

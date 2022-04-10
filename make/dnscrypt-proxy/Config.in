@@ -13,4 +13,4 @@ config FREETZ_PACKAGE_DNSCRYPT_PROXY_RESOLVERS
 	depends on FREETZ_PACKAGE_DNSCRYPT_PROXY
 	default y
 	help
-		Install dnscrypt-resolvers.csv to /usr/share/dnscrypt-proxy/dnscrypt-resolvers.csv
+		Install dnscrypt-resolvers.csv to /var/media/ftp/dnscrypt-resolvers.csv

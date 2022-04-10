@@ -19,7 +19,7 @@ $(PKG)_CONFIGURE_OPTIONS += --enable-plugins
 #$(PKG)_CONFIGURE_OPTIONS += --with-included-ltdl
 
 $(PKG)_RESOLVERS_FILE:=$($(PKG)_DIR)/dnscrypt-resolvers.csv
-$(PKG)_TARGET_RESOLVERS_FILE:=$($(PKG)_DEST_DIR)/usr/share/dnscrypt-proxy/dnscrypt-resolvers.csv
+$(PKG)_TARGET_RESOLVERS_FILE:=$($(PKG)_DEST_DIR)/var/media/ftp/dnscrypt-resolvers.csv
 
 $(PKG_SOURCE_DOWNLOAD)
 $(PKG_UNPACKED)
