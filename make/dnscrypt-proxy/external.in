@@ -6,10 +6,3 @@ config EXTERNAL_FREETZ_PACKAGE_DNSCRYPT_PROXY
 		externals the following file(s):
 		 /usr/bin/dnscrypt-proxy
 
-config EXTERNAL_FREETZ_PACKAGE_DNSCRYPT_PROXY_CSV
-	depends on EXTERNAL_FREETZ_PACKAGE_DNSCRYPT_PROXY
-	bool "csv resolver file"
-	default n
-	help
-		externals the following file(s):
-                 /var/media/ftp/dnscrypt-resolvers.csv
