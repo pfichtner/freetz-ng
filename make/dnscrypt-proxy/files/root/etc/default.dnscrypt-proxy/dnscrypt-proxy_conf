@@ -2,16 +2,15 @@
 
 cat << "EOF"
 ResolverName random
-# ResolversList /usr/local/share/dnscrypt-proxy/dnscrypt-resolvers.csv
 
 ## Manual settings, only for a custom resolver not present in the CSV file
 # ProviderName    2.dnscrypt.resolver.example
 # ProviderKey     E801:B84E:A606:BFB0:BAC0:CE43:445B:B15E:BA64:B02F:A3C4:AA31:AE10:636A:0790:324D
 # ResolverAddress 203.0.113.1:443
 
-Daemonize no
+Daemonize yes
 PidFile /var/run/dnscrypt-proxy.pid
-User nobody
+############################################# User nobody
 # LocalCache on
 ## Creates a new key pair for every query.
 ## This prevents logging servers from correlating client public keys with
@@ -22,10 +21,12 @@ EphemeralKeys off
 # LogLevel 6
 EOF
 
-[ -n "$DNSCRYPT_PROXY_BINDADDRESS" ] && echo "LocalAddress $DNSCRYPT_PROXY_BINDADDRESS"
-[ -n "$DNSCRYPT_PROXY_MAXCLIENTS" ]  && echo "MaxActiveRequests $DNSCRYPT_PROXY_MAXCLIENTS"
-[ -n "$DNSCRYPT_PROXY_LOG_FILE" ]    && echo "LogFile $DNSCRYPT_PROXY_LOG_FILE"
-if [ -n "$DNSCRYPT_LOG_SYSLOG" ]; then
+
+[ -n "$DNSCRYPT_PROXY_RESOLVERLIST" ] && echo "ResolversList $DNSCRYPT_PROXY_RESOLVERLIST"
+[ -n "$DNSCRYPT_PROXY_BINDADDRESS" ]  && echo "LocalAddress $DNSCRYPT_PROXY_BINDADDRESS"
+[ -n "$DNSCRYPT_PROXY_MAXCLIENTS" ]   && echo "MaxActiveRequests $DNSCRYPT_PROXY_MAXCLIENTS"
+[ -n "$DNSCRYPT_PROXY_LOGFILE" ]      && echo "LogFile $DNSCRYPT_PROXY_LOGFILE"
+if [ -n "$DNSCRYPT_PROXY_SYSLOG" ]; then
 	echo "Syslog       on"
 	echo "SyslogPrefix dnscrypt"
 fi

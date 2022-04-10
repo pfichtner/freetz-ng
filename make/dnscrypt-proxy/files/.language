@@ -5,4 +5,5 @@ default
 files
 {
 	usr/lib/cgi-bin/dnscrypt-proxy.cgi
+	etc/default.dnscrypt-proxy/dnscrypt-proxy_extra.def
 }
