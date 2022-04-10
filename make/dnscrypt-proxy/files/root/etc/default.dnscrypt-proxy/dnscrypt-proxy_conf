@@ -1,8 +1,6 @@
 #!/bin/sh
 
 cat << "EOF"
-ResolverName random
-
 ## Manual settings, only for a custom resolver not present in the CSV file
 # ProviderName    2.dnscrypt.resolver.example
 # ProviderKey     E801:B84E:A606:BFB0:BAC0:CE43:445B:B15E:BA64:B02F:A3C4:AA31:AE10:636A:0790:324D
@@ -23,6 +21,7 @@ EOF
 
 
 [ -n "$DNSCRYPT_PROXY_RESOLVERLIST" ] && echo "ResolversList $DNSCRYPT_PROXY_RESOLVERLIST"
+echo "ResolverName ${DNSCRYPT_PROXY_RESOLVERNAME:-random}"
 [ -n "$DNSCRYPT_PROXY_BINDADDRESS" ]  && echo "LocalAddress $DNSCRYPT_PROXY_BINDADDRESS"
 [ -n "$DNSCRYPT_PROXY_MAXCLIENTS" ]   && echo "MaxActiveRequests $DNSCRYPT_PROXY_MAXCLIENTS"
 [ -n "$DNSCRYPT_PROXY_LOGFILE" ]      && echo "LogFile $DNSCRYPT_PROXY_LOGFILE"
