@@ -1,0 +1,5 @@
+CAPTION='DNSCrypt-Proxy: dnscrypt-resolvers.csv'
+
+CONFIG_FILE='/var/media/ftp/dnscrypt-resolvers.csv'
+CONFIG_SAVE='modsave flash'
+CONFIG_TYPE='text'
