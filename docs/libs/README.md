@@ -111,7 +111,7 @@ Index:
   * **[libavmhmac (libavmhmac.so) - EXPERIMENTAL 0.2](libavmhmac.md)<a id='libavmhmac'></a>**<br>
     Replaces AVM's libavmhmac. Our libavmhmac only forwards functions to openssl's libcrypto where AVM wrote their own implementations. We have no clue why they did this.
 
-  * **[libcap (libcap.so) 2.24](libcap.md)<a id='libcap'></a>**<br>
+  * **[libcap (libcap.so) 2.63](libcap.md)<a id='libcap'></a>**<br>
     A library for getting and setting POSIX.1e (formerly POSIX 6) draft 15 capabilities.
 
   * **[libcapi: CAPI 2.0 (libcapi20.so) avm-7390.05.50](libcapi.md)<a id='libcapi'></a>**<br>
@@ -222,14 +222,17 @@ Index:
   * **[libtirpc (libtirpc.so) 1.3.2](libtirpc.md)<a id='libtirpc'></a>**<br>
     Libtirpc is a port of Suns Transport-Independent RPC library to Linux. It's being developed by the Bull GNU/Linux NFSv4 project.
 
-  * **[libtool: libltdl (libltdl.so) 1.5.26](libtool.md)<a id='libtool'></a>**<br>
+  * **[libtool (libltdl.so) 1.5.26](libtool.md)<a id='libtool'></a>**<br>
     A generic dynamic object loading library
 
   * **[libusb-0.1 (libusb-0.1.so) 0.1.7/0.1.12](libusb.md)<a id='libusb'></a>**<br>
     A library for accessing Linux USB devices (legacy API).
 
-  * **[libusb1: libusb-1.0 (libusb-1.0.so) 1.0.23/1.0.25](libusb1.md)<a id='libusb1'></a>**<br>
+  * **[libusb1: libusb-1.0 (libusb-1.0.so) 1.0.23/1.0.26](libusb1.md)<a id='libusb1'></a>**<br>
     A library for accessing Linux USB devices (current API).
+
+  * **[libuv (libuv.so) 1.44.1](libuv.md)<a id='libuv'></a>**<br>
+    libuv is a async IO library for various programs
 
   * **[libvorbis (libvorbis.so) 1.3.5](libvorbis.md)<a id='libvorbis'></a>**<br>
     Vorbis is the name of a specific audio compression scheme that's designed to be contained in Ogg. libvorbis is a BSD-style license software implementation of the Vorbis specification by the Xiph.Org Foundation.
@@ -345,6 +348,9 @@ Index:
 
   * **[udns: libudns (libudns.so) 0.4](udns.md)<a id='udns'></a>**<br>
     UDNS is a stub DNS resolver library with ability to perform both syncronous and asyncronous DNS queries.
+
+  * **[utf8proc (libutf8proc.so) 2.7.0](utf8proc.md)<a id='utf8proc'></a>**<br>
+    a clean C library for processing UTF-8 Unicode data: normalization, case-folding, graphemes, and more
 
 ### Y
 

@@ -74,7 +74,7 @@ Index:
   * **<u>bfusb: AVM BlueFRITZ! USB stick support (binary only)</u><a id='bfusb'></a>**<br>
     This package adds support for the AVM BlueFRITZ! USB stick.
 
-  * **[BIND 9.11.36](bind.md)<a id='bind'></a>**<br>
+  * **[BIND 9.16.27](bind.md)<a id='bind'></a>**<br>
     BIND is an implementation of the Domain Name System (DNS) protocols. The name BIND stands for "Berkeley Internet Name Daemon". You have to provide the config and needed zone files yourself.
 
   * **[Bip 0.9.2](bip.md)<a id='bip'></a>**<br>
@@ -174,7 +174,7 @@ Index:
   * **<u>dosfstools 3.0.28 (binary only)</u><a id='dosfstools'></a>**<br>
     utilities to create, check and label MS-DOS FAT filesystems
 
-  * **[Dropbear 2020.81](dropbear.md)<a id='dropbear'></a>**<br>
+  * **[Dropbear 2022.82](dropbear.md)<a id='dropbear'></a>**<br>
     Dropbear SSH server and client Dropbear is a relatively small SSH 2 server and client. It runs on a variety of POSIX-based platforms. Dropbear is open source software, distributed under a MIT-style license. Dropbear is particularly useful for "embedded"-type Linux (or other Unix) systems, such as wireless routers. Features - A small memory footprint suitable for memory-constrained environments - Dropbear can compile to a 110kB statically linked binary with uClibc on x86 (only minimal options selected) - Dropbear server implements X11 forwarding, and authentication-agent forwarding for OpenSSH clients - Can run from inetd or standalone - Compatible with OpenSSH ~/.ssh/authorized_keys public key authentication - The server, client, keygen, and key converter can be compiled into a single binary (a la busybox) - Features can easily be disabled when compiling to save space TCP forwarding support
 
   * **[dtach 0.8 (binary only)](dtach.md)<a id='dtach'></a>**<br>
@@ -228,7 +228,7 @@ Index:
   * **<u>Ghostscript fonts 8.11 (binary only)</u><a id='ghostscript-fonts'></a>**<br>
     This package provides the Ghostscript fonts.
 
-  * **[git 2.35.1](git.md)<a id='git'></a>**<br>
+  * **[git 2.35.2](git.md)<a id='git'></a>**<br>
     Git is a fast, scalable, distributed revision control system with an unusually rich command set that provides both high-level operations and full access to internals.
 
   * **<u>gntpsend 0.3.2-git (binary only)</u><a id='gntpsend'></a>**<br>
@@ -473,7 +473,7 @@ Index:
   * **[Openntpd 3.9p1](openntpd.md)<a id='openntpd'></a>**<br>
     OpenNTPD is a FREE, easy to use implementation of the Network Time Protocol. This package automatically removes AVM'S chronyd if necessary.
 
-  * **[OpenSSH 8.9p1](openssh.md)<a id='openssh'></a>**<br>
+  * **[OpenSSH 9.0p1](openssh.md)<a id='openssh'></a>**<br>
     OpenSSH is the premier connectivity tool for remote login with the SSH protocol. It encrypts all traffic to eliminate eavesdropping, connection hijacking, and other attacks. In addition, OpenSSH provides a large suite of secure tunneling capabilities, several authentication methods, and sophisticated configuration options.
 
   * **[OpenSSL 0.9.8zh/1.0.2u/1.1.1n/3.0.2 (binary only)](openssl.md)<a id='openssl'></a>**<br>
@@ -643,7 +643,7 @@ Index:
   * **<u>spawn-fcgi 1.6.3 (binary only)</u><a id='spawn-fcgi'></a>**<br>
     Spawns FastCGI processes
 
-  * **<u>SQLite (v3.x) database engine (CLI) 3.37.0 (binary only)</u><a id='sqlite'></a>**<br>
+  * **[SQLite (v3.x) database engine (CLI) 3.38.2 (binary only)](sqlite.md)<a id='sqlite'></a>**<br>
     SQLite is a small C library that implements a self-contained, embeddable, zero-configuration SQL database engine.
 
   * **<u>squashfs3: squashfs-tools 3.4</u><a id='squashfs3'></a>**<br>
@@ -667,7 +667,7 @@ Index:
   * **[Stunnel 5.60](stunnel.md)<a id='stunnel'></a>**<br>
     Stunnel universal SSL proxy
 
-  * **[Subversion 1.8.19/1.9.12](subversion.md)<a id='subversion'></a>**<br>
+  * **[Subversion 1.9.12/1.14.2](subversion.md)<a id='subversion'></a>**<br>
     Subversion, also known as svn, is a version control system much like the Concurrent Versions System (CVS). Version control systems allow many individuals (who may be distributed geographically) to collaborate on a set of files (typically source code). Subversion has all the major features of CVS, plus certain new features that CVS users often wish they had.
 
   * **<u>sudo 1.7.10 (binary only)</u><a id='sudo'></a>**<br>

@@ -66,7 +66,7 @@ Latest changes
    * ACME.sh 3.0.2 (letsencrypt)
    * Apache 2.4.53
    * AutoFS 5.0.5/5.1.8
-   * BIND 9.11.36
+   * BIND 9.16.27
    * Bip 0.9.2
    * BusyBox 1.34.1
    * BusyBox 1.35.0
@@ -75,10 +75,12 @@ Latest changes
    * cifs-utils 6.14
    * Curl 7.82.0
    * davfs2 1.5.2/1.6.1
+   * dropbear 2022.82
    * expat 2.4.8
-   * git 2.34.1
+   * git 2.35.2
    * HAProxy 2.5.5
    * iksemel 3.1.1
+   * libcap 2.63
    * libexif 0.6.24
    * libgsasl 1.10.0
    * libgcrypt 1.9.4
@@ -88,7 +90,8 @@ Latest changes
    * libneon 0.32.1
    * libnfsidmap 0.27
    * libudns 0.4
-   * libusb1 1.0.23/1.0.25
+   * libusb1 1.0.23/1.0.26
+   * libuv 1.44.1
    * lighttpd 1.4.64
    * LCD4linux e2cfdc5-git
    * mbed TLS 2.7.19/2.28.0
@@ -96,17 +99,18 @@ Latest changes
    * Nano 6.0
    * ncurses 6.3
    * ncursesw 6.3
-   * OpenSSH 8.9p1
+   * OpenSSH 9.0p1
    * OpenSSL 0.9.8zh/1.0.2u/1.1.1n/3.0.2
    * OpenVPN 2.4.12/2.5.6
    * pcre 8.45
    * pcre2 10.39
    * PCSC-lite 1.9.5
    * socat 1.7.4.2
-   * SQLite 3.37.0
+   * SQLite 3.38.2
    * sslh 1.22c
    * strace 4.9/5.0/5.17
    * Stunnel 5.60
+   * Subversion 1.9.12/1.14.2
    * Sundtek DVB driver 130210.134617/170310.204343/210803.071224
    * tinc 1.0.36/1.1pre18
    * tinyproxy 1.11.0
@@ -114,6 +118,7 @@ Latest changes
    * uClibc-ng 1.0.40
    * Unbound 1.14.0
    * UnRAR 6.1.4
+   * utf8proc 2.7.0
    * Wget GNU 1.21.2
    * wireguard-linux-compat 1.0.20211208
    * wireguard-tools 1.0.20210914

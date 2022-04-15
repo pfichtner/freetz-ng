@@ -1,10 +1,10 @@
-$(call PKG_INIT_BIN, 9.11.36)
-$(PKG)_SOURCE:=$(pkg)-$($(PKG)_VERSION).tar.gz
-$(PKG)_SOURCE_SHA256:=c953fcb6703b395aaa53e65ff8b2869b69a5303dd60507cba2201305e1811681
+$(call PKG_INIT_BIN, 9.16.27)
+$(PKG)_SOURCE:=$(pkg)-$($(PKG)_VERSION).tar.xz
+$(PKG)_SOURCE_SHA256:=90902aaf104c81019d75d6f8b2f7ec40fcd249406f894b44e4a9c6b5e08bf566
 $(PKG)_SITE:=https://downloads.isc.org/isc/bind9/$($(PKG)_VERSION),http://ftp.isc.org/isc/bind9/$($(PKG)_VERSION)
 ### WEBSITE:=https://www.isc.org/bind/
-### MANPAGE:=https://bind9.readthedocs.io/en/latest/
-### CHANGES:=https://bind9.readthedocs.io/en/latest/notes.html
+### MANPAGE:=https://bind9.readthedocs.io/en/v9_16/
+### CHANGES:=https://bind9.readthedocs.io/en/v9_16/notes.html
 ### CVSREPO:=https://gitlab.isc.org/isc-projects/bind9/
 
 $(PKG)_STARTLEVEL=40 # multid-wrapper may start it earlier!
@@ -23,17 +23,17 @@ $(eval $(call $(PKG)_DEFS,bin,nsupdate dig))
 
 $(PKG)_EXCLUDED+=$(if $(FREETZ_PACKAGE_BIND_NAMED),,usr/lib/bind usr/lib/cgi-bin/bind.cgi etc/default.bind etc/init.d/rc.bind)
 
+$(PKG)_DEPENDS_ON += libatomic libuv openssl libcap
+
 $(PKG)_CONFIGURE_PRE_CMDS += $(call PKG_PREVENT_RPATH_HARDCODING,./configure) 
 
 $(PKG)_CONFIGURE_OPTIONS += BUILD_CC="$(HOSTCC)"
 $(PKG)_CONFIGURE_OPTIONS += --disable-shared
 $(PKG)_CONFIGURE_OPTIONS += --enable-static
-$(PKG)_CONFIGURE_OPTIONS += --enable-atomic=no
 $(PKG)_CONFIGURE_OPTIONS += --enable-epoll=no
 $(PKG)_CONFIGURE_OPTIONS += --with-lmdb=no
 $(PKG)_CONFIGURE_OPTIONS += --with-randomdev="/dev/random"
 $(PKG)_CONFIGURE_OPTIONS += --with-libtool
-$(PKG)_CONFIGURE_OPTIONS += --without-openssl
 $(PKG)_CONFIGURE_OPTIONS += --without-python
 $(PKG)_CONFIGURE_OPTIONS += --without-gssapi
 $(PKG)_CONFIGURE_OPTIONS += --disable-isc-spnego
