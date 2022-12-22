@@ -3,7 +3,7 @@ name: Sync Fork
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/30 * * * *' # every 30 minutes
+    - cron: '50 3 * * *'
 
 jobs:
   sync:
