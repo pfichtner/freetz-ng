@@ -17,7 +17,7 @@ jobs:
         ref: master
     - name: Pull upstream changes
       id: sync
-      uses: bdougie/Fork-Sync-With-Upstream-action@fork
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
       with:
         upstream_repository: Freetz-NG/freetz-ng
         upstream_branch: master
