@@ -19,6 +19,7 @@ jobs:
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
       with:
-        upstream_repository: Freetz-NG/freetz-ng
-        upstream_branch: master
-        target_branch: master
+        target_sync_branch: master
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_repo: Freetz-NG/freetz-ng
+        upstream_sync_branch: master
