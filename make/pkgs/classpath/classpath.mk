@@ -18,8 +18,8 @@ $(PKG)_LIBS_BUILD_DIR:=$(join $(CLASSPATH_LIBS_BUILD_DIR_SHORT:%=$($(PKG)_DIR)/n
 $(PKG)_LIBS_STAGING_DIR:=$(CLASSPATH_LIBNAMES_LONG:%=$(TARGET_TOOLCHAIN_STAGING_DIR)$(CLASSPATH_LIBRARY_DIR)/%)
 $(PKG)_LIBS_TARGET_DIR:=$(CLASSPATH_LIBNAMES_LONG:%=$($(PKG)_DEST_DIR)$(CLASSPATH_LIBRARY_DIR)/%)
 
-$(PKG)_BUILD_PREREQ += fastjar javac
-$(PKG)_BUILD_PREREQ_HINT := Hint: on Debian-like systems fastjar is provided by the package of the same name, whereas javac (Java compiler) is provided by many packages. You could use either of them interchangeably.
+$(PKG)_BUILD_PREREQ += javac
+$(PKG)_BUILD_PREREQ_HINT := Hint: on Debian-like systems javac (Java compiler) is provided by many packages. You could use either of them interchangeably.
 
 $(PKG)_REBUILD_SUBOPTS += FREETZ_TARGET_IPV6_SUPPORT
 $(PKG)_REBUILD_SUBOPTS += FREETZ_PACKAGE_CLASSPATH_MINI
@@ -50,7 +50,7 @@ $(PKG_CONFIGURED_CONFIGURE)
 $($(PKG)_CLASSES_FILE) $($(PKG)_LIBS_BUILD_DIR): $($(PKG)_DIR)/.configured
 	$(SUBMAKE) -C $(CLASSPATH_DIR)
 	cp $(CLASSPATH_MAKE_DIR)/mini.classlist $(CLASSPATH_DIR)/lib;
-	( cd $(CLASSPATH_DIR)/lib; fastjar -Mcf $(CLASSPATH_CLASSES_FILE_MINI) -@ < mini.classlist );
+	( cd $(CLASSPATH_DIR)/lib; $(FREETZ_BASE_DIR)/$(TOOLS_DIR)/fastjar/fastjar -Mcf $(CLASSPATH_CLASSES_FILE_MINI) -@ < mini.classlist );
 
 $($(PKG)_TARGET_CLASSES_FILE): $($(PKG)_CLASSES_FILE)
 	$(INSTALL_FILE)
