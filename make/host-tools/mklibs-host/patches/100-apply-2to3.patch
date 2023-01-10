@@ -1,54 +1,46 @@
 --- a/src/mklibs
 +++ b/src/mklibs
-@@ -57,17 +57,17 @@ debuglevel = DEBUG_NORMAL
+@@ -57,7 +57,7 @@
  
  def debug(level, *msg):
      if debuglevel >= level:
 -        print(string.join(msg))
-+        print(' '.join(msg))
++        print((string.join(msg)))
  
  # return a list of lines of output of the command
  def command(command, *args):
--    debug(DEBUG_SPAM, "calling", command, string.join(args))
-+    debug(DEBUG_SPAM, "calling", command, ' '.join(args))
-     pipe = os.popen(command + ' ' + ' '.join(args), 'r')
+@@ -66,9 +66,9 @@
      output = pipe.read().strip()
      status = pipe.close() 
      if status is not None and os.WEXITSTATUS(status) != 0:
-         print("Command failed with status", os.WEXITSTATUS(status),  ":", \
+-        print("Command failed with status", os.WEXITSTATUS(status),  ":", \
 -               command, string.join(args))
-+               command, ' '.join(args))
-         print("With output:", output)
+-        print("With output:", output)
++        print(("Command failed with status", os.WEXITSTATUS(status),  ":", \
++               command, string.join(args)))
++        print(("With output:", output))
          sys.exit(1)
      return [i for i in output.split('\n') if i]
-@@ -296,7 +296,7 @@ def usage(was_err):
-     print("Make a set of minimal libraries for FILE(s, file=outfd) in DEST.", file=outfd)
-     print("" , file=outfd)
-     print("  -d, --dest-dir DIRECTORY     create libraries in DIRECTORY", file=outfd)
--    print("  -D, --no-default-lib         omit default libpath (", ':'.join(default_lib_path, file=outfd), ", file=outfd)", file=outfd)
-+    print("  -D, --no-default-lib         omit default libpath (", ':'.join(default_lib_path), ")", file=outfd)
-     print("  -L DIRECTORY[:DIRECTORY]...  add DIRECTORY(s, file=outfd) to the library search path", file=outfd)
-     print("  -l LIBRARY                   add LIBRARY always", file=outfd)
-     print("      --ldlib LDLIB            use LDLIB for the dynamic linker", file=outfd)
-@@ -372,7 +372,7 @@ for opt, arg in optlist:
-         if debuglevel < DEBUG_SPAM:
-             debuglevel = debuglevel + 1
-     elif opt == "-L":
--        lib_path.extend(string.split(arg, ":"))
-+        lib_path.extend(arg.split(":"))
-     elif opt in ("-d", "--dest-dir"):
-         dest_path = arg
-     elif opt in ("-D", "--no-default-lib"):
-@@ -391,7 +391,7 @@ for opt, arg in optlist:
-     elif opt in ("-l",):
-         force_libs.append(arg)
-     elif opt == "--gcc-options":
--        gcc_options.extend(string.split(arg, " "))
-+        gcc_options.extend(arg.split(" "))
-     elif opt == "--libdir":
-         libdir = arg
-     elif opt in ("--help", "-h"):
-@@ -419,17 +419,17 @@ if ldlib == "LDLIB":
+ 
+@@ -313,7 +313,7 @@
+     sys.exit(was_err)
+ 
+ def version(vers):
+-    print("mklibs: version ",vers)
++    print(("mklibs: version ",vers))
+     print("")
+ 
+ #################### main ####################
+@@ -403,7 +403,7 @@
+         version(vers)
+         sys.exit(0)
+     else:
+-        print("WARNING: unknown option: " + opt + "\targ: " + arg)
++        print(("WARNING: unknown option: " + opt + "\targ: " + arg))
+ 
+ if include_default_lib_path == "yes":
+     lib_path.extend([a.replace("/lib/", "/" + libdir + "/") for a in default_lib_path])
+@@ -421,7 +421,7 @@
  objects = {}  # map from inode to filename
  for prog in proglist:
      inode = os.stat(prog)[ST_INO]
@@ -57,10 +49,7 @@
          debug(DEBUG_SPAM, prog, "is a hardlink to", objects[inode])
      elif so_pattern.match(prog):
          debug(DEBUG_SPAM, prog, "is a library")
--    elif script_pattern.match(open(prog).read(256)):
-+    elif script_pattern.match(open(prog, 'r', encoding='iso-8859-1').read(256)):
-         debug(DEBUG_SPAM, prog, "is a script")
-     else:
+@@ -431,7 +431,7 @@
          objects[inode] = prog
  
  if not ldlib:
@@ -69,20 +58,33 @@
          output = command("mklibs-readelf", "--print-interp", obj)
          if output:
              ldlib = output.pop()
-@@ -462,9 +462,9 @@ previous_pass_unresolved = set()
+@@ -451,10 +451,10 @@
+             for rpath_elem in rpath_val:
+                 if not rpath_elem in lib_rpath:
+                     if debuglevel >= DEBUG_VERBOSE:
+-                        print("Adding rpath " + rpath_elem + " for " + obj)
++                        print(("Adding rpath " + rpath_elem + " for " + obj))
+                     lib_rpath.append(rpath_elem)
+         else:
+-            print("warning: " + obj + " may need rpath, but --root not specified")
++            print(("warning: " + obj + " may need rpath, but --root not specified"))
+ 
+ lib_path.extend(lib_rpath)
+ 
+@@ -464,9 +464,9 @@
  while 1:
      debug(DEBUG_NORMAL, "I: library reduction pass", str(passnr))
      if debuglevel >= DEBUG_VERBOSE:
 -        print("Objects:",)
 -        for obj in sorted([x[string.rfind(x, '/') + 1:] for x in objects.values()]):
 -            print(obj,)
-+        print("Objects:", end=' ')
-+        for obj in sorted([x[x.rfind('/') + 1:] for x in list(objects.values())]):
-+            print(obj, end=' ')
++        print(("Objects:",))
++        for obj in sorted([x[string.rfind(x, '/') + 1:] for x in list(objects.values())]):
++            print((obj,))
          print()
  
      passnr = passnr + 1
-@@ -474,7 +474,7 @@ while 1:
+@@ -476,7 +476,7 @@
          obj = dest_path + "/" + lib
          small_libs.append(obj)
          inode = os.stat(obj)[ST_INO]
@@ -91,18 +93,31 @@
              debug(DEBUG_SPAM, obj, "is hardlink to", objects[inode])
          else:
              objects[inode] = obj
-@@ -504,7 +504,7 @@ while 1:
-     present_symbols = {}
-     checked_libs = small_libs
-     checked_libs.extend(available_libs)
--    checked_libs.append(ldlib)
-+    checked_libs.append(sysroot + "/" + ldlib)
-     for lib in checked_libs:
-         for symbol in provided_symbols(lib):
-             debug(DEBUG_SPAM, "present_symbols adding %s" % symbol)
 --- a/src/mklibs-copy
 +++ b/src/mklibs-copy
-@@ -159,7 +159,7 @@ if include_default_lib_path:
+@@ -51,9 +51,9 @@
+     output = pipe.read().strip()
+     status = pipe.close()
+     if status is not None and os.WEXITSTATUS(status) != 0:
+-        print("Command failed with status", os.WEXITSTATUS(status),  ":", \
+-               command, ' '.join(args))
+-        print("With output:", output)
++        print(("Command failed with status", os.WEXITSTATUS(status),  ":", \
++               command, ' '.join(args)))
++        print(("With output:", output))
+         sys.exit(1)
+     return output.split('\n')
+ 
+@@ -134,7 +134,7 @@
+         return paths
+ 
+ def version(vers):
+-    print("mklibs: version ",vers)
++    print(("mklibs: version ",vers))
+     print("")
+ 
+ # Clean the environment
+@@ -159,7 +159,7 @@
  objects = {}  # map from inode to filename
  for prog in proglist:
      inode = os.stat(prog)[ST_INO]
@@ -111,7 +126,7 @@
          logger.debug("%s is a hardlink to %s", prog, objects[inode])
      elif so_pattern.match(prog):
          logger.debug("%s is a library", prog)
-@@ -169,7 +169,7 @@ for prog in proglist:
+@@ -169,7 +169,7 @@
          logger.debug("%s is no ELF", prog)
  
  if not ldlib:
@@ -120,7 +135,7 @@
          output = command("mklibs-readelf", "-i", obj)
          for x in output:
                  ldlib = x
-@@ -182,7 +182,7 @@ if not ldlib:
+@@ -182,7 +182,7 @@
  logger.info('Using %s as dynamic linker', ldlib)
  
  # Check for rpaths
@@ -129,7 +144,7 @@
      rpath_val = rpath(obj)
      if rpath_val:
          if root:
-@@ -208,18 +208,18 @@ while 1:
+@@ -208,18 +208,18 @@
          obj = dest_path + "/" + lib
          small_libs.append(obj)
          inode = os.stat(obj)[ST_INO]
