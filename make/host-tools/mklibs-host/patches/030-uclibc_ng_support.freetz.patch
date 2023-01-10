@@ -1,6 +1,6 @@
 --- src/mklibs
 +++ src/mklibs
-@@ -606,12 +606,12 @@
+@@ -615,12 +615,12 @@
                  extra_post_obj.append(sysroot + libc_extras_dir + "/sofini.o")
                  symbols.add(ProvidedSymbol('__dso_handle', None, None, True, True))
  
