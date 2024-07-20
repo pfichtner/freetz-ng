@@ -1,0 +1,52 @@
+$(call PKG_INIT_LIB, 1.7.17)
+$(PKG)_LIB_VERSION:=$($(PKG)_VERSION)
+$(PKG)_SOURCE:=$(pkg)-$($(PKG)_VERSION).tar.gz
+$(PKG)_HASH:=c91d1eeb7175c50d49f6ba2a25e69b46bd05cffb798382c19bfb202e467ec51c
+$(PKG)_SITE:=https://github.com/DaveGamble/cJSON/archive/refs/tags/v$($(PKG)_VERSION)
+
+$(PKG)_LIBNAME:=$(pkg).so.$($(PKG)_LIB_VERSION)
+$(PKG)_BINARY:=$($(PKG)_DIR)/$($(PKG)_LIBNAME)
+$(PKG)_STAGING_BINARY:=$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/$(pkg).so.$($(PKG)_LIB_VERSION)
+$(PKG)_TARGET_BINARY:=$($(PKG)_TARGET_DIR)/$($(PKG)_LIBNAME)
+
+$(PKG)_DEPENDS_ON += cmake-host
+
+$(PKG)_CONFIGURE_OPTIONS += -DCMAKE_INSTALL_PREFIX="/"
+$(PKG)_CONFIGURE_OPTIONS += -DCMAKE_SKIP_INSTALL_RPATH=NO
+$(PKG)_CONFIGURE_OPTIONS += -DCMAKE_SKIP_RPATH=NO
+$(PKG)_CONFIGURE_OPTIONS += -DENABLE_CJSON_TEST=Off
+
+
+$(PKG_SOURCE_DOWNLOAD)
+$(PKG_UNPACKED)
+$(PKG_CONFIGURED_CMAKE)
+
+$($(PKG)_BINARY): $($(PKG)_DIR)/.configured
+	$(SUBMAKE) -C $(LIBCJSON_DIR)
+
+$($(PKG)_STAGING_BINARY): $($(PKG)_BINARY)
+	$(SUBMAKE) \
+		DESTDIR="$(TARGET_TOOLCHAIN_STAGING_DIR)" \
+		-C $(LIBCJSON_DIR) install
+	$(PKG_FIX_LIBTOOL_LA) \
+		$(TARGET_TOOLCHAIN_STAGING_DIR)/lib/pkgconfig/libcjson.pc
+
+$($(PKG)_TARGET_BINARY): $($(PKG)_STAGING_BINARY)
+	$(INSTALL_LIBRARY_STRIP)
+
+$(pkg): $($(PKG)_STAGING_BINARY)
+
+$(pkg)-precompiled: $($(PKG)_TARGET_BINARY)
+
+$(pkg)-clean:
+	-$(SUBMAKE) -C $(LIBCJSON_DIR) clean
+	$(RM) -r \
+		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/libcjson.* \
+		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/include/cjson.h \
+		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/pkgconfig/libcjson.pc
+
+$(pkg)-uninstall:
+	$(RM) $(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/libcjson.so*
+
+$(PKG_FINISH)
+
