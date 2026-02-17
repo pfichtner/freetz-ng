@@ -137,6 +137,7 @@ Latest changes
     * Info-ZIP 3.0
     * iPerf3 3.3/3.20
     * ldd 0.1/1.0.56
+    * mosquitto 2.1.2
     * MTR 0.80/0.96
     * Nano 8.7.1
     * Net-SNMP 5.9.5.2

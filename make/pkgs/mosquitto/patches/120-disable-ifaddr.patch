@@ -1,24 +1,25 @@
 --- src/net.c
 +++ src/net.c
-@@ -20,7 +20,9 @@
- 
+@@ -21,8 +21,10 @@
  #ifndef WIN32
  #  include <arpa/inet.h>
-+#ifdef HAVE_IFADDRS_H
- #  include <ifaddrs.h>
-+#endif
+ #  ifndef _AIX
++#  ifdef HAVE_IFADDRS_H
+ #    include <ifaddrs.h>
+ #  endif
++#  endif
  #  include <netdb.h>
  #  include <netinet/tcp.h>
  #  include <strings.h>
-@@ -619,6 +621,7 @@
+@@ -719,6 +721,7 @@
  
  
- #ifndef WIN32
+ #if !defined(WIN32) && !defined(_AIX)
 +#ifdef HAVE_IFADDRS_H
+ 
+ 
  static int net__bind_interface(struct mosquitto__listener *listener, struct addrinfo *rp)
- {
- 	/*
-@@ -695,6 +698,7 @@
+@@ -797,6 +800,7 @@
  	}
  }
  #endif
@@ -26,19 +27,3 @@
  
  
  static int net__socket_listen_tcp(struct mosquitto__listener *listener)
-@@ -771,6 +775,7 @@
- 		}
- 
- #ifndef WIN32
-+#ifdef HAVE_IFADDRS_H
- 		if(listener->bind_interface){
- 			/* It might be possible that an interface does not support all relevant sa_families.
- 			 * We should successfully find at least one. */
-@@ -788,6 +793,7 @@
- 			interface_bound = true;
- 		}
- #endif
-+#endif
- 
- 		if(bind(sock, rp->ai_addr, rp->ai_addrlen) == -1){
- #if defined(__linux__)
