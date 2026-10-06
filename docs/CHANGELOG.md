@@ -68,21 +68,29 @@ Latest changes
     * ccache 4.14.1
 
   - Host tools:
+    * cmake 4.4.4
     * openssl 3.5.9
     * python3 3.14.8
+
+  - AVM sources:
+    * 1700     8.26 - 5.15.176
+    * 2700     8.26 - 5.15.176
 
   - Patches:
     * Various Fritzos 8.25 related fixes
 
   - Packages:
+    * Apache2 2.4.69
     * ImageMagick 7.1.0-62/7.1.2-32
     * iPerf3 3.3/3.22
     * OpenSSL 0.9.8zh/1.0.2u/1.1.1w/3.0.22/3.5.9
     * ser2net 4.6.8
 
   - Libraries:
+    * expat 2.7.5/2.9.0
     * gensio 2.8.15
-    * harfbuzz 14.5.1
+    * harfbuzz 14.6.0
+    * libpng 1.6.59
     * pcre2 10.49
 
   - Firmware updates:
