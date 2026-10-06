@@ -13,18 +13,35 @@ $(PKG)_BUILD_BINARIES    := $($(PKG)_LIBRARIES_FILES:%=$($(PKG)_DIR)/lib/.libs/%
 $(PKG)_STAGING_BINARIES  := $($(PKG)_LIBRARIES_FILES:%=$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/%)
 $(PKG)_TARGET_BINARIES   := $($(PKG)_LIBRARIES_FILES:%=$($(PKG)_TARGET_DIR)/%)
 
+
+$(PKG)_CONFIGURE_OPTIONS += --enable-shared
+$(PKG)_CONFIGURE_OPTIONS += --enable-static
 $(PKG)_CONFIGURE_OPTIONS += --disable-doc
+
+$(PKG)_CONFIGURE_OPTIONS += --with-all-gensios=no
+$(PKG)_CONFIGURE_OPTIONS += --with-net=yes
+$(PKG)_CONFIGURE_OPTIONS += --with-serialdev=yes
+$(PKG)_CONFIGURE_OPTIONS += --with-telnet=yes
+
+$(PKG)_CONFIGURE_OPTIONS += --with-cplusplus=no
 $(PKG)_CONFIGURE_OPTIONS += --with-glib=no
 $(PKG)_CONFIGURE_OPTIONS += --with-tcl=no
 $(PKG)_CONFIGURE_OPTIONS += --with-swig=no
-$(PKG)_CONFIGURE_OPTIONS += --with-cplusplus=no
+$(PKG)_CONFIGURE_OPTIONS += --with-python=no
+$(PKG)_CONFIGURE_OPTIONS += --with-go=no
+
 $(PKG)_CONFIGURE_OPTIONS += --with-sctp=no
-$(PKG)_CONFIGURE_OPTIONS += --with-ssl=no
-$(PKG)_CONFIGURE_OPTIONS += --with-certauth=no
+$(PKG)_CONFIGURE_OPTIONS += --with-openipmi=no
+$(PKG)_CONFIGURE_OPTIONS += --with-mdns=no
+$(PKG)_CONFIGURE_OPTIONS += --with-avahi=no
+$(PKG)_CONFIGURE_OPTIONS += --with-dnssd=no
+$(PKG)_CONFIGURE_OPTIONS += --with-winmdns=no
+$(PKG)_CONFIGURE_OPTIONS += --with-alsa=no
+$(PKG)_CONFIGURE_OPTIONS += --with-winsound=no
+$(PKG)_CONFIGURE_OPTIONS += --with-portaudio=no
+$(PKG)_CONFIGURE_OPTIONS += --with-udev=no
+$(PKG)_CONFIGURE_OPTIONS += --with-openssl=no
 $(PKG)_CONFIGURE_OPTIONS += --with-tcp-wrappers=no
-$(PKG)_CONFIGURE_OPTIONS += --with-all-gensios=yes
-$(PKG)_CONFIGURE_OPTIONS += --enable-shared
-$(PKG)_CONFIGURE_OPTIONS += --enable-static
 
 
 $(PKG_SOURCE_DOWNLOAD)
@@ -32,13 +49,10 @@ $(PKG_UNPACKED)
 $(PKG_CONFIGURED_CONFIGURE)
 
 $($(PKG)_BUILD_BINARIES): $($(PKG)_DIR)/.configured
-	$(SUBMAKE) -C $(GENSIO_DIR)/lib
+	$(SUBMAKE) -C $(GENSIO_DIR)
 
 $($(PKG)_STAGING_BINARIES): $($(PKG)_BUILD_BINARIES)
-	$(SUBMAKE) -C $(GENSIO_DIR)/lib \
-		DESTDIR="$(TARGET_TOOLCHAIN_STAGING_DIR)" \
-		install
-	$(SUBMAKE) -C $(GENSIO_DIR)/include \
+	$(SUBMAKE) -C $(GENSIO_DIR) \
 		DESTDIR="$(TARGET_TOOLCHAIN_STAGING_DIR)" \
 		install
 	$(PKG_FIX_LIBTOOL_LA) \
@@ -54,16 +68,15 @@ $(pkg)-precompiled: $($(PKG)_TARGET_BINARIES)
 
 
 $(pkg)-clean:
-	-$(SUBMAKE) -C $(GENSIO_DIR)/lib clean
+	-$(SUBMAKE) -C $(GENSIO_DIR) clean
 	$(RM) -r \
 		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/libgensio*.so* \
+		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/libgensio*.a \
 		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/libgensio*.la \
 		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/pkgconfig/libgensio*.pc \
-		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/include/gensio
+		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/include/gensio/
 
 $(pkg)-uninstall:
-	$(RM) $(GENSIO_TARGET_DIR)/libgensio*.so* \
-		$(GENSIO_TARGET_DIR)/libgensioosh*.so* \
-		$(GENSIO_TARGET_DIR)/libgensiomdns*.so*
+	$(RM) $(GENSIO_TARGET_DIR)/libgensio*.so*
 
 $(PKG_FINISH)
