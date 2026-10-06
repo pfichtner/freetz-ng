@@ -1,0 +1,14 @@
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -12,9 +12,9 @@ man_MANS = ser2net.8 ser2net.yaml.5
+ EXTRA_DIST = $(man_MANS) ser2net.yaml ser2net.spec ser2net.init reconf \
+ 	     ser2net.service.in
+ 
+-SUBDIRS = tests
++#SUBDIRS = tests
+ 
+-DIST_SUBDIRS = $(SUBDIRS)
++#DIST_SUBDIRS = $(SUBDIRS)
+ 
+ noinst_DATA = ser2net.service
+ 

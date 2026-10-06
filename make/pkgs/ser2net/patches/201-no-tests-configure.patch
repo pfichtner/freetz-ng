@@ -1,0 +1,9 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -130,5 +130,5 @@ AC_CHECK_LIB(yaml, yaml_document_initialize, [],
+ AC_CHECK_LIB(yaml, yaml_document_initialize, [],
+    [AC_MSG_ERROR([libyaml won't link, please install libyaml dev package])])
+ 
+-AC_CONFIG_FILES([Makefile tests/Makefile])
++AC_CONFIG_FILES([Makefile])
+ AC_OUTPUT
