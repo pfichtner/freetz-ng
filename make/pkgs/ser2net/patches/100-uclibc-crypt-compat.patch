@@ -1,15 +1,14 @@
 --- a/configure
 +++ b/configure
-@@ -12887,10 +12887,9 @@
+@@ -12887,10 +12887,10 @@
    have_crypt_r=yes
  fi
  
--if test $have_crypt_r != "yes"; then
+ if test $have_crypt_r != "yes"; then
 -  as_fn_error $? "No libcrypt with crypt_r()" "$LINENO" 5
-+if test $have_crypt_r = "yes"; then
-+  LIBS="$LIBS -lcrypt"
++  echo "ser2net: no crypt_r() found, linking with -lcrypt"
  fi
--LIBS="$LIBS -lcrypt"
+ LIBS="$LIBS -lcrypt"
  
  
  # Check whether --with-sysfs-led-support was given.

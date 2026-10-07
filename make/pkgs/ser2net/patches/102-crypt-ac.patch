@@ -1,16 +1,15 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -96,11 +96,10 @@
+@@ -96,11 +96,11 @@
  fi
  
  have_crypt_r=no
  AC_CHECK_LIB(crypt, crypt_r, [have_crypt_r=yes], [])
--if test $have_crypt_r != "yes"; then
+ if test $have_crypt_r != "yes"; then
 -  AC_MSG_ERROR([No libcrypt with crypt_r()])
-+if test $have_crypt_r = "yes"; then
-+  LIBS="$LIBS -lcrypt"
++  AC_MSG_NOTICE([no crypt_r() found, linking with -lcrypt])
  fi
--LIBS="$LIBS -lcrypt"
+ LIBS="$LIBS -lcrypt"
  
  AC_ARG_WITH(sysfs-led-support,
   [  --with-sysfs-led-support   Enable LED support (Linux only)],

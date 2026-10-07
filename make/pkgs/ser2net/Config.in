@@ -6,6 +6,7 @@ config FREETZ_PACKAGE_SER2NET
 	select FREETZ_LIB_libgensioosh
 	select FREETZ_LIB_libgensiomdns
 	select FREETZ_LIB_libyaml
+	select FREETZ_LIB_libcrypt if FREETZ_TARGET_UCLIBC_HAS_multiple_libs
 	select FREETZ_LIB_libpthread if FREETZ_TARGET_UCLIBC_HAS_multiple_libs
 	help
 		Ser2net is a program for allowing network connections to serial
