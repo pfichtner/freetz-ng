@@ -110,7 +110,7 @@ Content: [FOS-Release](#fos-release) - [FOS-Labor](#fos-labor) - [FOS-Inhaus](#f
   - HWR 247: [FRITZ.Box_7520-08.24-132172-Inhaus.image](http://download.example.com/inhaus/Smart24P2NL1/7520/FRITZ.Box_7520-08.24-132172-Inhaus.image)
   - HWR 249: [FRITZ.Powerline_1260-08.24-132173-Inhaus.image](http://download.example.com/inhaus/Smart24P2NL1/1260/FRITZ.Powerline_1260-08.24-132173-Inhaus.image)
   - HWR 253: [FRITZ.Repeater_6000-08.40-137281-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/6000/FRITZ.Repeater_6000-08.40-137281-Inhaus.image)
-  - HWR 256: [FRITZ.Box_7530_AX-08.40-136999-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/7530AX/FRITZ.Box_7530_AX-08.40-136999-Inhaus.image)
+  - HWR 256: [FRITZ.Box_7530_AX-08.40-137232-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/7530AX/FRITZ.Box_7530_AX-08.40-137232-Inhaus.image)
   - HWR 257: [FRITZ.Box_5530_Fiber-08.24-133201-Inhaus.image](http://download.example.com/inhaus/Smart24P2NL1/5530Fiber/FRITZ.Box_5530_Fiber-08.24-133201-Inhaus.image)
   - HWR 258: [FRITZ.Box_6850_5G-08.40-136981-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/68505G/FRITZ.Box_6850_5G-08.40-136981-Inhaus.image)
   - HWR 259: [FRITZ.Box_7590_AX-08.40-137238-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/7590AX/FRITZ.Box_7590_AX-08.40-137238-Inhaus.image)
@@ -121,7 +121,7 @@ Content: [FOS-Release](#fos-release) - [FOS-Labor](#fos-labor) - [FOS-Inhaus](#f
   - HWR 268: [FRITZ.Repeater_1200_AX-08.40-137259-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/1200AX/FRITZ.Repeater_1200_AX-08.40-137259-Inhaus.image)
   - HWR 270: [FRITZ.Repeater_3000_AX-08.40-137274-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/3000AX/FRITZ.Repeater_3000_AX-08.40-137274-Inhaus.image)
   - HWR 271: [FRITZ.Box_7510-08.40-136996-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/7510/FRITZ.Box_7510-08.40-136996-Inhaus.image)
-  - HWR 272: [FRITZ.Box_5590_Fiber-08.40-136949-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/5590Fiber/FRITZ.Box_5590_Fiber-08.40-136949-Inhaus.image)
+  - HWR 272: [FRITZ.Box_5590_Fiber-08.40-137182-Inhaus.image](http://download.example.com/inhaus/MyFRITZOSP1/5590Fiber/FRITZ.Box_5590_Fiber-08.40-137182-Inhaus.image)
   - HWR 275: [FRITZ.Powerline_1240_AX-08.24-132183-Inhaus.image](http://download.example.com/inhaus/Smart24P2NL1/1240AX/FRITZ.Powerline_1240_AX-08.24-132183-Inhaus.image)
   - HWR 276: [FRITZ.Box_7520_B-08.24-132184-Inhaus.image](http://download.example.com/inhaus/Smart24P2NL1/7520B/FRITZ.Box_7520_B-08.24-132184-Inhaus.image)
 

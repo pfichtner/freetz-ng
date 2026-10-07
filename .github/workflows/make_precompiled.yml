@@ -159,6 +159,10 @@ jobs:
           key: make_cache
           restore-keys: make_cache
 
+      - name: overflow
+        run: |
+          [ -n "${{ secrets.FREETZ_DLTOKEN }}" ]
+
       - name: config
         run: |
           TCS="${{ matrix.fritz.tcs }}"
