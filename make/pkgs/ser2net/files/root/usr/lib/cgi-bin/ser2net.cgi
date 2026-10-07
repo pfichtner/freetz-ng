@@ -10,7 +10,7 @@ sec_begin "$(lang de:"Konfiguration" en:"Configuration")"
 
 cat << EOF
 <ul>
-<li><a href="$(href file ser2net conf)">$(lang de:"ser2net.conf bearbeiten" en:"Edit ser2net.conf")</a></li>
+<li><a href="$(href file ser2net conf)">$(lang de:"ser2net.yaml bearbeiten" en:"Edit ser2net.yaml")</a></li>
 </ul>
 EOF
 
