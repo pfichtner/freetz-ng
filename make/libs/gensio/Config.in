@@ -24,5 +24,7 @@ config FREETZ_LIB_libgensiomdns
 	select FREETZ_LIB_libgensioosh
 	default n
 	help
-		Gensio mDNS library - provides mDNS service discovery support.
+		Gensio mDNS library stub. Built without avahi support (--with-mdns=no),
+		so all mDNS functions return GE_NOTSUP. Required by consumers (e.g.
+		ser2net) that link against libgensiomdns regardless of mDNS usage.
 

@@ -22,6 +22,7 @@ $(PKG)_CONFIGURE_OPTIONS += --with-sctp=no
 $(PKG)_CONFIGURE_OPTIONS += --with-ssl=no
 $(PKG)_CONFIGURE_OPTIONS += --with-certauth=no
 $(PKG)_CONFIGURE_OPTIONS += --with-tcp-wrappers=no
+$(PKG)_CONFIGURE_OPTIONS += --with-mdns=no
 $(PKG)_CONFIGURE_OPTIONS += --with-all-gensios=yes
 $(PKG)_CONFIGURE_OPTIONS += --enable-shared
 $(PKG)_CONFIGURE_OPTIONS += --enable-static
