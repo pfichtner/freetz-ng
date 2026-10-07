@@ -45,10 +45,9 @@ $($(PKG)_BUILD_BINARIES): $($(PKG)_DIR)/.configured
 	$(SUBMAKE) -C $(GENSIO_DIR)/lib
 
 $($(PKG)_STAGING_BINARIES): $($(PKG)_BUILD_BINARIES)
-	mkdir -p $(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/gensio/
 	$(SUBMAKE) -C $(GENSIO_DIR)/lib \
 		DESTDIR="$(TARGET_TOOLCHAIN_STAGING_DIR)" \
-		install
+		install-libLTLIBRARIES install-pkgconfigexecDATA
 	$(SUBMAKE) -C $(GENSIO_DIR)/include \
 		DESTDIR="$(TARGET_TOOLCHAIN_STAGING_DIR)" \
 		install
@@ -75,7 +74,6 @@ $(pkg)-clean:
 	$(RM) -r \
 		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/libgensio*.so* \
 		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/libgensio*.la \
-		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/gensio \
 		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/lib/pkgconfig/libgensio*.pc \
 		$(TARGET_TOOLCHAIN_STAGING_DIR)/usr/include/gensio
 
