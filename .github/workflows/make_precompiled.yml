@@ -1,12 +1,12 @@
 name: make_precompiled
 
 on:
-  pull_request:
-    branches: [ master ]
-    paths:
-      - 'make/pkgs/**'
-      - 'make/libs/**'
-      - '!.github/**'
+# pull_request:
+#   branches: [ master ]
+#   paths:
+#     - 'make/pkgs/**'
+#     - 'make/libs/**'
+#     - '!.github/**'
   push:
     branches: [ master ]
     paths:
@@ -158,10 +158,6 @@ jobs:
             !dl/*-freetz-*-shared-glibc.tar.lzma
           key: make_cache
           restore-keys: make_cache
-
-      - name: overflow
-        run: |
-          [ -n "${{ secrets.FREETZ_DLTOKEN }}" ]
 
       - name: config
         run: |

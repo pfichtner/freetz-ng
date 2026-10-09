@@ -83,9 +83,14 @@ Latest changes
 
   - Packages:
     * Apache2 2.4.69
+    * axTLS wrapper 2.1.5
     * Bftpd 6.7
+    * bridge-utils 1.7.1
+    * Empty 0.6.23d
+    * endlessh 1.1
     * ImageMagick 7.1.0-62/7.1.2-32
     * iPerf3 3.3/3.22
+    * lsof 4.99.7
     * OpenSSH 9.3p2/10.6p1
     * OpenSSL 0.9.8zh/1.0.2u/1.1.1w/3.0.22/3.5.9
     * ser2net 4.6.8
@@ -93,15 +98,26 @@ Latest changes
     * Patchelf 0.19.2
     * PHP 5.6.40/8.2.34/8.3.35/8.4.26/8.5.11
     * procps-ng 4.0.7
+    * Python3 3.14.8
+    * rpcbind 1.3.1
+    * sispmctl 4.12
+    * tcpdump 4.99.7
     * Tor 0.4.8.25/0.4.9.14
+    * Vim 9.2.1169
 
   - Libraries:
     * expat 2.7.5/2.9.0
     * gensio 3.0.4
+    * GLib2 2.32.4/2.90.1
     * harfbuzz 14.6.0
     * libconfuse 3.4
+    * libgcrypt 1.12.4
+    * libgpg-error 1.61
+    * libpcap 1.11.0
     * libpng 1.6.59
+    * libtasn1 4.21.0
     * pcre2 10.49
+    * utf8proc 2.12.0
 
   - Firmware updates:
     * Please see [FIRMWARES](FIRMWARES.md) for the list of currently supported devices and firmwares.
