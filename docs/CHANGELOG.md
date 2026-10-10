@@ -88,6 +88,7 @@ Latest changes
     * bridge-utils 1.7.1
     * Empty 0.6.23d
     * endlessh 1.1
+    * GnuTLS 3.7.11/3.8.13
     * ImageMagick 7.1.0-62/7.1.2-32
     * iPerf3 3.3/3.22
     * lsof 4.99.7

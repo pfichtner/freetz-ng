@@ -235,7 +235,7 @@ Index: [A](#a) - [B](#b) - [C](#c) - [D](#d) - [E](#e) - [F](#f) - [G](#g) - [H]
   * **<u>gnu-make: Make 4.2.1/4.4.1 (binary only)</u><a id='gnu-make'></a>**<br>
     Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files.
 
-  * **[GnuTLS 3.7.8 (binary only) - DEPRECATED](gnutls.md)<a id='gnutls'></a>**<br>
+  * **[GnuTLS 3.7.11/3.8.13 (binary only)](gnutls.md)<a id='gnutls'></a>**<br>
     GnuTLS is a project that aims to develop a library which provides a secure layer, over a reliable transport layer. Currently the GnuTLS library implements TLS 1.3, 1.2, 1.1, 1.0 protocols and SSL 3.0.
 
   * **<u>gocr 0.49 (binary only) - DEPRECATED</u><a id='gocr'></a>**<br>
@@ -878,7 +878,7 @@ Index: [A](#a) - [B](#b) - [C](#c) - [D](#d) - [E](#e) - [F](#f) - [G](#g) - [H]
   * **<u>Asterisk 11.25.3 - DEPRECATED</u><a id='asterisk'></a>**<br>
     Asterisk is an open source framework for building communications applications.
 
-  * **<u>axtlswrap: axTLS wrapper 2.1.5 (binary only) - DEPRECATED</u><a id='axtlswrap'></a>**<br>
+  * **[axtlswrap: axTLS wrapper 2.1.5 (binary only) - DEPRECATED](axtlswrap.md)<a id='axtlswrap'></a>**<br>
 
   * **[Collectd 4.10.3 - DEPRECATED](collectd.md)<a id='collectd'></a>**<br>
     Collectd collects information about the system it is running on and stores this information. The information can then be used to do find current performance bottlenecks (i. e. performance analysis) and predict future system load (i. e. capacity planning). Or if you just want pretty graphs of your private server and are fed up with some homegrown solution you're at the right place, too.
