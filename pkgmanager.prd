@@ -1,0 +1,225 @@
+Freetz-NG Runtime Package Manager
+Product Requirements Document (PRD)
+Version 1.0 · Implementation handoff for a coding agent · 22 October 2026
+Purpose: define a small, safe runtime package-management layer for Freetz-NG. The system lets an administrator install and remove explicitly supported packages on a running router without rebuilding or reflashing firmware for each ordinary package change.
+1. Executive summary
+Implement a runtime package manager that is bootstrapped by Freetz-NG firmware and installs optional packages into a separate writable package root. USB storage is the only supported package destination in the first release. The design must allow future storage backends, including suitable internal writable storage, without changing the package format or CLI.
+The runtime manager is a new feature; it must not be confused with Freetz-NG's existing build-time externalization or USB-root mechanisms. The current firmware build system remains the source of compiled binaries and package artifacts. Repository hosting and package installation happen separately.
+2. Product goals
+    - Install, list, inspect, and remove supported runtime packages after the router has booted.
+    - Avoid reflashing for normal application/library package changes.
+    - Keep runtime package files isolated from AVM/Freetz-NG firmware files.
+    - Reuse the existing Freetz-NG toolchain and package build definitions where practical.
+    - Provide deterministic package metadata, compatibility checks, dependency handling, and integrity verification.
+    - Fail safely when USB storage is missing, full, corrupt, or incompatible.
+    - Make implementation incremental, testable, and reviewable by a coding agent.
+3. Non-goals for v1
+    - Replacing or redesigning the Freetz-NG firmware build system.
+    - Installing arbitrary OpenWrt/Entware packages or claiming binary compatibility with them.
+    - Replacing AVM system libraries or writing package files into the firmware root.
+    - Supporting kernel modules, kernel patches, firmware patches, or packages requiring changes to protected system services.
+    - Providing a graphical web UI.
+    - Building or compiling software on the router.
+    - Supporting every router model or firmware target in the first release.
+    - Implementing a general-purpose init system or fully transactional operating-system upgrades.
+4. Target users and primary use cases
+    - A Freetz-NG administrator installs a compatible utility such as a purpose-built test package or tcpdump without flashing a new image.
+    - An administrator lists installed packages and sees exact versions and storage status.
+    - An administrator removes a package without deleting files owned by another package.
+    - A developer builds a package with the existing Freetz-NG toolchain and produces a distributable runtime archive.
+    - An administrator reboots the router and the package database remains intact when USB storage is mounted again.
+5. Principles and constraints
+    - Firmware remains authoritative: The package manager, its minimal bootstrap, and the repository trust key are supplied by a Freetz-NG firmware build.
+    - Separate package root: Runtime package payloads are installed only under a configured writable package root. Do not write package payloads into /bin, /lib, /usr, /etc, or other firmware paths.
+    - Explicit compatibility: Every package must declare architecture/target and ABI constraints. Unknown compatibility is a rejection, not a warning.
+    - Fail closed: Missing storage, invalid signatures, hash mismatches, malformed metadata, path traversal, or insufficient space must stop the operation before modifying installed files.
+    - No hidden network trust: Do not install a package solely because it was downloaded over HTTPS. Verify repository metadata and package hashes against a trust anchor embedded in firmware.
+    - Small first release: Implement one supported target and one storage backend first; keep abstractions small and documented.
+    - Do not invent repository conventions: Inspect the current Freetz-NG tree, coding style, package makefiles, build targets, shell/tool availability, and supported toolchain before changing files.
+6. Scope and release stages
+M0 — Repository reconnaissance and design confirmation
+    - Inspect the current repository and document the existing package build lifecycle, target naming, toolchain/ABI information, staging/install directories, available archive and crypto tools, boot hooks, and test conventions.
+    - Identify a concrete first target. If no target is specified, do not guess: report candidate targets and the evidence needed to select one.
+    - Produce a short architecture note mapping proposed components to actual source-tree paths before implementation.
+    - Do not modify production files until the reconnaissance report and design are internally consistent.
+M1 — Local prototype and storage safety
+    - Implement a CLI that can report status and list packages from a local package database.
+    - Implement a USB storage backend with configurable mount/root detection.
+    - Create a minimal test package named hello that installs a harmless executable under the package root.
+    - Install, list, execute, remove, and reinstall the test package.
+    - Prove that missing/unmounted storage is not treated as an empty database and never causes destructive initialization.
+M2 — Package format and build integration
+    - Define and document a versioned package archive format and metadata schema.
+    - Add a packaging target that stages only declared runtime files from an existing Freetz-NG package build.
+    - Generate archive, metadata, hashes, and a deterministic build manifest where practical.
+    - Do not change existing firmware inclusion behavior unless explicitly configured.
+M3 — Repository and trust
+    - Implement repository index generation and client refresh.
+    - Verify signed repository metadata using a public key provisioned in firmware.
+    - Verify package archive hashes against authenticated metadata before extraction.
+    - Reject expired/unsupported metadata according to a documented policy; avoid silent downgrade of repository metadata.
+M4 — Dependencies and lifecycle
+    - Implement dependency resolution, install ordering, and reverse-dependency checks.
+    - Track every installed file and package ownership.
+    - Implement upgrades and safe removal with rollback or recovery for interrupted operations.
+    - Add package lifecycle hooks only if required; define a strict interface and execute hooks with controlled environment and explicit privilege.
+7. Functional requirements
+ID
+Area
+Requirement
+FR-001
+CLI
+Provide pkg status, pkg list, pkg info <name>, pkg install <name>, and pkg remove <name> in v1. Additional commands may be added in later milestones.
+FR-002
+Storage
+Use a configurable package root on USB storage in v1. Verify the mount is active and points to the intended device/filesystem; do not rely on path existence alone.
+FR-003
+Persistent state
+Store the package database and transaction journal on persistent writable storage. Use atomic file replacement where supported.
+FR-004
+Isolation
+Install payload files only below the package root. Never overwrite firmware files or follow archive paths outside the root.
+FR-005
+Package metadata
+Each package declares name, version, package format version, target/architecture, ABI/runtime constraints, file list or manifest, dependencies, and description.
+FR-006
+Compatibility
+Reject packages whose target, architecture, ABI, or package format is unsupported or unknown.
+FR-007
+Integrity
+Verify authenticated repository metadata and the package digest before installing. Reject unknown keys, bad signatures, and hash mismatches.
+FR-008
+Dependencies
+Resolve required package dependencies before installation; fail with a clear explanation when a dependency is unavailable or incompatible.
+FR-009
+Ownership
+Maintain an installed-file manifest. Refuse removal if the database is inconsistent; never remove a file owned by another package.
+FR-010
+Safe extraction
+Reject absolute paths, '..' traversal, duplicate conflicting paths, unexpected device nodes, unsafe symlinks, and unsupported archive entry types.
+FR-011
+Space
+Estimate required space and check available storage before changes. Handle write failures without claiming success.
+FR-012
+Missing storage
+If storage is absent, report it and refuse install/remove/upgrade/database initialization. Read-only firmware-provided help/status may still work.
+FR-013
+Logging
+Record package operations, result, package/version, and failure reason without logging secrets.
+FR-014
+Upgrade safety
+Never silently downgrade a package. Make downgrade an explicit future/opt-in operation with compatibility checks.
+FR-015
+Boot behavior
+The manager must not block normal router boot if USB storage is missing. Runtime package services are out of scope until service lifecycle support is designed.
+FR-016
+Build integration
+Provide an opt-in packaging target that generates runtime archives from existing Freetz-NG build outputs without breaking current firmware builds.
+FR-017
+Repository client
+Repository refresh must use authenticated metadata, bounded downloads, timeouts, and safe temporary files.
+FR-018
+Portability
+Use only tools/libraries confirmed available on the selected target, or package them as explicit bootstrap dependencies.
+FR-019
+Recovery
+Maintain enough transaction state to detect an interrupted install/remove and recover or report a safe, actionable error.
+FR-020
+Documentation
+Document supported target, setup, package creation, repository configuration, install/remove commands, recovery, and known limitations.
+8. CLI contract
+Initial interface (exact flags may follow existing Freetz-NG conventions):
+    - pkg status — Show manager version, configured package root, storage-mounted state, repository state, and database health.
+    - pkg list — List installed package names and versions.
+    - pkg info <name> — Show installed or repository metadata, compatibility, dependencies, and description.
+    - pkg install <name> — Install a compatible package and required dependencies from a configured authenticated repository.
+    - pkg remove <name> — Remove a package only when reverse dependencies and ownership checks allow it.
+Exit codes must be documented and stable enough for scripts. Errors must be concise and actionable. Do not report a successful operation until payload and database state are consistent.
+9. Package format and repository contract
+The coding agent must evaluate whether an existing lightweight format can be reused safely, but must not assume that OpenWrt/Entware packages are binary-compatible. Record the decision in an architecture note before coding.
+    - Use a versioned archive format with separate control metadata and payload.
+    - Metadata fields: package name, version, format version, target identifier, architecture, ABI/runtime profile, dependencies, conflicts (if supported), description, payload digest, and installed-file manifest.
+    - Repository metadata must bind each package identity/version/target to its archive digest and metadata.
+    - Use a maintained cryptographic signature implementation available for the chosen target, or a narrowly scoped verifier with a documented threat model. Do not invent cryptography.
+    - Define key rotation and metadata rollback policy before a public repository is considered production-ready.
+    - Never unpack an archive directly over the package root without validating every entry first.
+10. Storage layout
+Proposed logical layout; exact paths must be configurable and selected after target reconnaissance:
+    - /<package-root>/bin/ and /<package-root>/sbin/ — package executables
+    - /<package-root>/lib/ — runtime package libraries, subject to ABI policy
+    - /<package-root>/etc/ — package-owned configuration defaults only; preserve user edits on upgrade
+    - /<package-root>/var/ — package state/cache where appropriate
+    - /<package-root>/database/installed — installed package records and file ownership
+    - /<package-root>/database/transactions/ — transaction journal and recovery state
+    - /<package-root>/cache/ — downloaded package archives and repository metadata
+Do not assume /var/media/ftp/<usb> is universal. Discover mount naming and reliable mount/device checks for the selected target. Avoid using symlinks into the firmware root as a shortcut for integration.
+11. Security and failure handling
+    - Treat package archives, repository responses, filenames, metadata, and package hooks as untrusted input.
+    - Validate paths before extraction; defend against traversal, symlink escapes, hard links, special files, duplicate paths, and decompression/resource exhaustion.
+    - Use a trust anchor provisioned through firmware/build configuration. HTTPS alone is insufficient.
+    - Perform signature and digest checks before installing any payload.
+    - Use restrictive temporary-file permissions and avoid predictable shared temporary names.
+    - Use a lock to prevent concurrent package operations.
+    - Write a transaction journal before mutating installed state; recover deterministically after power loss or process termination.
+    - On insufficient storage or write failure, do not leave the database claiming a partially installed package is complete.
+    - Do not execute package hooks in v1 unless necessary. If added, hooks must be explicit, documented, and treated as privileged code.
+    - Never overwrite AVM/Freetz-NG files or delete unknown files during cleanup.
+12. Non-functional requirements
+    - Small memory and storage footprint suitable for the selected router target.
+    - No dependency on Python, Perl, or other large runtimes unless the chosen target explicitly includes them and the trade-off is documented.
+    - Predictable behavior on BusyBox-based systems and the selected shell/tool versions.
+    - Useful diagnostics on low-memory and low-storage devices.
+    - Reproducible package metadata and builds where the existing toolchain permits.
+    - Clear separation between host-side repository/build tooling and target-side runtime code.
+13. Testing and acceptance criteria
+    - A clean build of the selected Freetz-NG target still works with runtime packaging disabled.
+    - A test package can be built by the existing toolchain, packaged, and installed without reflashing.
+    - The installed test executable runs successfully on the selected router target.
+    - Listing shows the correct package version after installation and after reboot.
+    - Removing the test package removes only files owned by it.
+    - A missing USB mount causes install/remove to fail safely and does not initialize or overwrite the package database.
+    - A package for the wrong architecture/target/ABI is rejected before payload changes.
+    - A corrupted archive or incorrect digest is rejected before extraction.
+    - Invalid signature, unknown signing key, or malformed repository metadata is rejected.
+    - Path traversal and malicious symlink archive test cases cannot write outside the package root.
+    - Two packages claiming the same file cannot silently overwrite each other.
+    - A package with a missing dependency fails with a clear error and no partial success state.
+    - Simulated interruption at each transaction phase results in safe recovery or an explicit recoverable error.
+    - Insufficient disk space and read-only storage are handled without a false success result.
+    - Automated host-side tests cover metadata, resolver, path validation, and transaction logic; target smoke tests cover router-specific behavior.
+14. Implementation instructions for the coding agent
+    1. Start by inspecting the repository; do not assume paths, target names, build targets, package variables, mount paths, or available utilities.
+    2. Write a reconnaissance report and proposed source-file map before implementation.
+    3. Implement one milestone at a time in the order M0 → M1 → M2 → M3 → M4. Do not skip ahead.
+    4. At the end of each milestone, run relevant tests and report changed files, commands run, outcomes, unresolved risks, and the next milestone.
+    5. Keep changes small and consistent with the repository's existing coding style and licensing.
+    6. Do not silently change existing package build or firmware inclusion behavior.
+    7. Do not invent test results, claim hardware validation without actual hardware, or claim a target is supported without evidence.
+    8. If a requirement conflicts with current Freetz-NG architecture, stop and document options rather than introducing a risky workaround.
+    9. Use test fixtures and temporary directories for installer tests; never test destructive operations against a developer's live router or host system by default.
+    10. Before implementing cryptography, archive extraction, or transaction recovery, document the selected libraries/tools and threat model.
+15. Required deliverables
+    - Architecture/reconnaissance note grounded in the actual Freetz-NG source tree.
+    - Runtime CLI and storage backend for the first supported target.
+    - Minimal hello test package and repeatable host-side tests.
+    - Versioned package metadata and archive format specification.
+    - Build-system packaging integration that is opt-in and backward-compatible.
+    - Repository index generator and authenticated client, introduced in the relevant milestone.
+    - Documentation for development, installation, recovery, security, and limitations.
+    - A final implementation report mapping each functional requirement to code and tests.
+16. Open decisions the agent must resolve with evidence
+    - Which router model, firmware version, and Freetz-NG target will be supported first?
+    - What architecture/ABI/runtime identifier is available or should be generated from existing build metadata?
+    - Which crypto/signature tools and archive utilities are available on the target?
+    - Which USB mount detection method is reliable across reboot and reconnect?
+    - Should the package format reuse a known format or define a small Freetz-NG-specific format?
+    - What exact boot integration point can expose package binaries without modifying protected firmware files?
+    - What is the policy for user-edited package configuration during upgrade?
+The agent should not block all progress on questions that can be answered by repository inspection. It must, however, avoid selecting a hardware target or compatibility profile without evidence.
+17. Definition of done for v1
+V1 is complete when one explicitly supported Freetz-NG target can build a firmware containing the bootstrap, create a runtime package using the existing toolchain, install/list/run/remove that package from USB storage without reflashing, preserve correct state across reboot, reject incompatible or tampered packages, and pass the acceptance tests above. Repository upgrades and dependency resolution are required before calling the system production-ready; they may be delivered in later milestones.
+Appendix A — Suggested first coding-agent prompt
+Implement the Freetz-NG Runtime Package Manager according to this PRD. Begin with M0 only: inspect the actual repository and produce a concise reconnaissance report covering package build conventions, target/ABI metadata, available target tools and libraries, boot integration points, USB mount behavior, and test conventions. Propose the exact source paths and interfaces for M1. Do not change production code in M0. Do not assume a router target, mount path, package format, or cryptographic implementation. Cite the repository files and commands that support your findings. Stop after the report and wait for review before implementing M1.
+
+
+
