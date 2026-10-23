@@ -38,7 +38,8 @@ for suite in \
 	"$TESTDIR/test_path.sh" \
 	"$TESTDIR/test_build.sh" \
 	"$TESTDIR/test_edge_cases.sh" \
-	"$TESTDIR/test_rc.sh"; do
+	"$TESTDIR/test_rc.sh" \
+	"$TESTDIR/test_repo.sh"; do
 	run_suite "$suite"
 done
 
