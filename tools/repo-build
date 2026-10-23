@@ -1,0 +1,141 @@
+#!/bin/sh
+#
+# repo-build — generate and sign a Freetz-NG package repository index
+#
+# Usage:
+#   repo-build <repo-dir> <privkey-pem> [--arch <arch>] [--valid-days <N>]
+#                                       [--sequence <N>] [--base-url <url>]
+#
+# Arguments:
+#   repo-dir     directory containing .fpkg files; output files written here
+#   privkey-pem  Ed25519 private key in PEM format (never embedded in firmware)
+#
+# Options:
+#   --arch          target architecture string (default: from first .fpkg found)
+#   --valid-days N  how many days until the Release expires (default: 30)
+#   --sequence N    monotonically increasing sequence number (default: 1)
+#   --base-url URL  base URL clients will use to download packages (informational)
+#
+# Output (written into <repo-dir>):
+#   Packages       package index (one stanza per .fpkg)
+#   Release        signed metadata (ValidUntil, Sequence, SHA256-Packages)
+#   Release.sig    detached Ed25519 signature over Release (base64-encoded)
+#
+# Repository format version: 1
+#
+
+set -e
+
+REPO_FORMAT_VERSION=1
+VALID_DAYS=30
+SEQUENCE=1
+BASE_URL=""
+ARCH=""
+
+die() { echo "repo-build: $*" >&2; exit 1; }
+
+[ $# -ge 2 ] || die "usage: repo-build <repo-dir> <privkey-pem> [options]"
+
+REPO_DIR="$1"; shift
+PRIVKEY="$1"; shift
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--arch)        shift; ARCH="$1"       ;;
+		--valid-days)  shift; VALID_DAYS="$1"  ;;
+		--sequence)    shift; SEQUENCE="$1"    ;;
+		--base-url)    shift; BASE_URL="$1"    ;;
+		*) die "unknown option: $1" ;;
+	esac
+	shift
+done
+
+[ -d "$REPO_DIR" ]  || die "repo-dir does not exist: $REPO_DIR"
+[ -f "$PRIVKEY" ]   || die "private key not found: $PRIVKEY"
+
+# Verify openssl supports Ed25519
+openssl genpkey -algorithm ed25519 -out /dev/null 2>/dev/null || \
+	die "openssl does not support Ed25519; requires OpenSSL 3.0+"
+
+TMPDIR=$(mktemp -d "/tmp/repo-build.XXXXXX")
+trap 'rm -rf "$TMPDIR"' EXIT
+
+PACKAGES="$TMPDIR/Packages"
+: > "$PACKAGES"
+
+count=0
+for fpkg in "$REPO_DIR"/*.fpkg; do
+	[ -f "$fpkg" ] || continue
+
+	# Extract control file from archive
+	ctrl=$(tar xzf "$fpkg" -O CONTROL/control 2>/dev/null) || {
+		echo "repo-build: warning: skipping $fpkg (cannot extract CONTROL/control)" >&2
+		continue
+	}
+
+	name=$(echo "$ctrl"       | sed -n 's/^Name: //p'          | head -1)
+	version=$(echo "$ctrl"    | sed -n 's/^Version: //p'        | head -1)
+	fmt=$(echo "$ctrl"        | sed -n 's/^FormatVersion: //p'  | head -1)
+	pkg_arch=$(echo "$ctrl"   | sed -n 's/^Arch: //p'           | head -1)
+	desc=$(echo "$ctrl"       | sed -n 's/^Description: //p'    | head -1)
+	depends=$(echo "$ctrl"    | sed -n 's/^Depends: //p'        | head -1)
+
+	[ -n "$name" ] && [ -n "$version" ] && [ -n "$pkg_arch" ] || {
+		echo "repo-build: warning: skipping $fpkg (missing required control fields)" >&2
+		continue
+	}
+
+	[ -z "$ARCH" ] && ARCH="$pkg_arch"
+
+	filename=$(basename "$fpkg")
+	pkg_hash=$(sha256sum "$fpkg" | awk '{print $1}')
+	size=$(wc -c < "$fpkg" | tr -d ' ')
+
+	[ "$count" -gt 0 ] && printf '\n' >> "$PACKAGES"
+	{
+		printf 'Package: %s\n'       "$name"
+		printf 'Version: %s\n'       "$version"
+		printf 'FormatVersion: %s\n' "$fmt"
+		printf 'Arch: %s\n'          "$pkg_arch"
+		printf 'Description: %s\n'   "${desc:-Freetz-NG runtime package}"
+		[ -n "$depends" ] && printf 'Depends: %s\n' "$depends"
+		printf 'Filename: %s\n'      "$filename"
+		printf 'SHA256: %s\n'        "$pkg_hash"
+		printf 'Size: %s\n'          "$size"
+	} >> "$PACKAGES"
+	count=$((count + 1))
+done
+
+[ "$count" -gt 0 ] || die "no valid .fpkg files found in $REPO_DIR"
+
+packages_hash=$(sha256sum "$PACKAGES" | awk '{print $1}')
+
+# Compute ValidUntil date
+valid_until=$(date -u -d "+${VALID_DAYS} days" '+%Y-%m-%d' 2>/dev/null) || \
+	valid_until=$(date -u -v "+${VALID_DAYS}d" '+%Y-%m-%d' 2>/dev/null) || \
+	valid_until="9999-12-31"
+
+RELEASE="$TMPDIR/Release"
+{
+	printf 'FormatVersion: %s\n'   "$REPO_FORMAT_VERSION"
+	printf 'Arch: %s\n'            "${ARCH:-unknown}"
+	printf 'Date: %s\n'            "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+	printf 'ValidUntil: %s\n'      "$valid_until"
+	printf 'Sequence: %s\n'        "$SEQUENCE"
+	printf 'SHA256-Packages: %s\n' "$packages_hash"
+	[ -n "$BASE_URL" ] && printf 'BaseURL: %s\n' "$BASE_URL"
+} > "$RELEASE"
+
+# Sign Release with Ed25519 private key
+SIG_BIN="$TMPDIR/Release.sig.bin"
+openssl pkeyutl -sign -inkey "$PRIVKEY" -rawin -in "$RELEASE" -out "$SIG_BIN"
+base64 "$SIG_BIN" > "$TMPDIR/Release.sig"
+
+# Commit outputs atomically
+cp "$PACKAGES"        "$REPO_DIR/Packages"
+cp "$RELEASE"         "$REPO_DIR/Release"
+cp "$TMPDIR/Release.sig" "$REPO_DIR/Release.sig"
+
+echo "repo-build: wrote $count package(s) to $REPO_DIR"
+echo "repo-build:   Sequence=$SEQUENCE  ValidUntil=$valid_until"
+echo "repo-build:   SHA256-Packages=$packages_hash"

@@ -1,0 +1,5 @@
+# Example placeholder — replace with your Ed25519 public key in PEM format.
+# Generate with:
+#   openssl genpkey -algorithm ed25519 -out repo-private.pem
+#   openssl pkey -in repo-private.pem -pubout -out trusted.pub
+# Copy trusted.pub to this directory as 'trusted.pub' before building firmware.

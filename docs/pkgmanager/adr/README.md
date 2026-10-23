@@ -10,9 +10,10 @@
 | [ADR-006](ADR-006-mkdir-lock.md) | `mkdir`-based advisory lock | Accepted | M1 |
 | [ADR-007](ADR-007-two-pass-extraction.md) | Two-pass archive validation before installation | Accepted | M1 |
 | [ADR-008](ADR-008-runtime-root-staging.md) | `files/runtime-root/` for declaring runtime package contents | Accepted | M2 |
+| [ADR-009](ADR-009-signing-scheme.md) | Ed25519 via `openssl pkeyutl` for repository signing | Accepted | M3 |
 
 ## Open decisions (to be resolved in future milestones)
 
-- **M3**: Which signing scheme — RSA (openssl rsautl), Ed25519 (openssl genpkey/pkeyutl), or a dedicated lightweight tool? What is the key rotation and metadata rollback policy?
+- **M3 (resolved)**: Ed25519 — see ADR-009.
 - **M4**: Dependency resolution algorithm — topological sort in shell or compiled helper? How are circular dependencies detected and reported?
 - **M4**: What is the user-edited config preservation policy during upgrade? (Merge, backup, replace-with-notice?)
