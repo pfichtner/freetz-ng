@@ -1,0 +1,151 @@
+#!/bin/sh
+#
+# pkg-build — produce a Freetz-NG runtime package archive (.fpkg)
+#
+# Usage:
+#   pkg-build <name> <version> <arch> <stagingroot> <destdir> [--control-file <file>]
+#
+# Arguments:
+#   name           package name (alphanumeric, dash, underscore)
+#   version        package version string (e.g. 1.0.0)
+#   arch           target arch string (e.g. arm-linux-uclibcgnueabi)
+#   stagingroot    directory containing package payload (files to install)
+#   destdir        output directory; archive named <name>-<version>-<arch>.fpkg
+#   --control-file optional file with extra metadata fields (Description, Depends, etc.)
+#
+# The stagingroot must contain only regular files, directories, and symlinks.
+# No absolute paths, device nodes, or path traversal components are allowed.
+#
+# pkg-control override file format (key: value, one per line):
+#   Description: Network packet analyzer
+#   Depends: libpcap
+#
+# Output archive layout (format version 1):
+#   CONTROL/control        key: value metadata
+#   CONTROL/manifest       sha256  ./relpath  (one entry per payload file)
+#   CONTROL/build-manifest deterministic file listing with source hashes
+#   data/                  payload files mirroring stagingroot
+#
+
+set -e
+
+PKG_FORMAT_VERSION=1
+
+die() {
+	echo "pkg-build: $*" >&2
+	exit 1
+}
+
+CONTROL_FILE=""
+
+# Parse arguments
+NAME="$1"; shift || true
+VERSION="$1"; shift || true
+ARCH="$1"; shift || true
+STAGINGROOT="$1"; shift || true
+DESTDIR="$1"; shift || true
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--control-file)
+			shift
+			CONTROL_FILE="$1"
+			shift
+			;;
+		*)
+			die "unknown argument: $1"
+			;;
+	esac
+done
+
+[ -n "$NAME" ] && [ -n "$VERSION" ] && [ -n "$ARCH" ] && \
+	[ -n "$STAGINGROOT" ] && [ -n "$DESTDIR" ] || \
+	die "usage: pkg-build <name> <version> <arch> <stagingroot> <destdir> [--control-file <file>]"
+
+# Validate name
+case "$NAME" in
+	*[!a-zA-Z0-9_-]*) die "invalid package name: $NAME" ;;
+esac
+
+[ -d "$STAGINGROOT" ] || die "stagingroot does not exist: $STAGINGROOT"
+[ -d "$DESTDIR" ]     || mkdir -p "$DESTDIR"
+
+if [ -n "$CONTROL_FILE" ]; then
+	[ -f "$CONTROL_FILE" ] || die "control-file not found: $CONTROL_FILE"
+fi
+
+OUTPUT="$DESTDIR/${NAME}-${VERSION}-${ARCH}.fpkg"
+
+TMPDIR=$(mktemp -d "/tmp/pkg-build.XXXXXX")
+trap 'rm -rf "$TMPDIR"' EXIT
+chmod 700 "$TMPDIR"
+
+mkdir -p "$TMPDIR/CONTROL" "$TMPDIR/data"
+
+# Copy payload into data/, preserving relative structure
+(cd "$STAGINGROOT" && find . -mindepth 1 | while IFS= read -r rel; do
+	case "$rel" in
+		*/../*|../*|*/..) die "path traversal in stagingroot: $rel" ;;
+	esac
+	src="$STAGINGROOT/$rel"
+	dst="$TMPDIR/data/$rel"
+	if [ -d "$src" ]; then
+		mkdir -p "$dst"
+	elif [ -f "$src" ]; then
+		mkdir -p "${dst%/*}"
+		cp "$src" "$dst"
+		[ -x "$src" ] && chmod +x "$dst"
+	elif [ -L "$src" ]; then
+		mkdir -p "${dst%/*}"
+		cp -P "$src" "$dst"
+	else
+		die "unsupported file type in stagingroot: $rel"
+	fi
+done)
+
+# Build payload manifest (sha256  ./relpath, sorted for determinism)
+manifest="$TMPDIR/CONTROL/manifest"
+(cd "$TMPDIR/data" && find . -type f | sort | while IFS= read -r rel; do
+	hash=$(sha256sum "$rel" | awk '{print $1}')
+	printf '%s  %s\n' "$hash" "$rel"
+done) > "$manifest"
+
+# Build deterministic build manifest (source file hashes for reproducibility)
+build_manifest="$TMPDIR/CONTROL/build-manifest"
+{
+	printf 'format-version: %s\n' "$PKG_FORMAT_VERSION"
+	printf 'build-date: %s\n' "$(date -u '+%Y-%m-%d' 2>/dev/null || echo unknown)"
+	printf 'source-files:\n'
+	(cd "$STAGINGROOT" && find . -type f | sort | while IFS= read -r rel; do
+		hash=$(sha256sum "$rel" | awk '{print $1}')
+		printf '  %s  %s\n' "$hash" "$rel"
+	done)
+} > "$build_manifest"
+
+# Extract optional metadata from control-file override
+DESCRIPTION="Freetz-NG runtime package"
+DEPENDS=""
+
+if [ -n "$CONTROL_FILE" ]; then
+	desc=$(sed -n 's/^Description: //p' "$CONTROL_FILE" | head -1)
+	deps=$(sed -n 's/^Depends: //p' "$CONTROL_FILE" | head -1)
+	[ -n "$desc" ] && DESCRIPTION="$desc"
+	[ -n "$deps" ] && DEPENDS="$deps"
+fi
+
+# Write control file
+{
+	printf 'Name: %s\n' "$NAME"
+	printf 'Version: %s\n' "$VERSION"
+	printf 'FormatVersion: %s\n' "$PKG_FORMAT_VERSION"
+	printf 'Arch: %s\n' "$ARCH"
+	printf 'Description: %s\n' "$DESCRIPTION"
+	[ -n "$DEPENDS" ] && printf 'Depends: %s\n' "$DEPENDS"
+} > "$TMPDIR/CONTROL/control"
+
+# Build archive (deterministic: sorted entries, fixed owner/group)
+tar czf "$OUTPUT" -C "$TMPDIR" \
+	--owner=0 --group=0 --numeric-owner \
+	CONTROL data
+
+echo "pkg-build: created $OUTPUT"

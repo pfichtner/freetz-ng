@@ -1,0 +1,18 @@
+config FREETZ_PACKAGE_PKGMANAGER
+	bool "Runtime Package Manager 1.0 (scripts only)"
+	default n
+	depends on FREETZ_TARGET_ARCH_ARM
+	help
+		Runtime package manager for Freetz-NG.
+		Installs optional packages onto USB storage without reflashing.
+
+		The 'pkg' command supports:
+		  pkg status   - show storage and database health
+		  pkg list     - list installed packages
+		  pkg info     - show package metadata
+		  pkg install  - install a .fpkg archive
+		  pkg remove   - remove an installed package
+
+		Requires USB storage mounted at the configured path.
+		First supported target: ARM 32-bit (arm-linux-uclibcgnueabi).
+

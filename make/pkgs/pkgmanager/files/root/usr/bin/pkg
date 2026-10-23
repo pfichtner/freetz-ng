@@ -1,0 +1,438 @@
+#!/bin/sh
+#
+# Freetz-NG Runtime Package Manager
+# CLI: pkg status|list|info|install|remove|help
+#
+# Exit codes:
+#   0  success
+#   1  generic error / usage
+#   2  storage unavailable
+#   3  package not found
+#   4  integrity/compatibility error
+#   5  conflict or ownership error
+#
+
+PKG_VERSION=1.0
+PKG_FORMAT_VERSION=1
+PKG_CONFIG=/mod/etc/conf/pkgmanager.cfg
+
+[ -r "$PKG_CONFIG" ] && . "$PKG_CONFIG"
+
+: "${PKG_ROOT:=/var/media/ftp/uStor01/pkgroot}"
+: "${PKG_STORAGE_MOUNT:=/var/media/ftp/uStor01}"
+: "${PKG_ARCH:=arm-linux-uclibcgnueabi}"
+
+PKG_DB="$PKG_ROOT/database/installed"
+PKG_JOURNAL="$PKG_ROOT/database/transactions"
+PKG_LOCK="$PKG_ROOT/database/.lock"
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+die() {
+	echo "pkg: $*" >&2
+	exit 1
+}
+
+die_code() {
+	local code="$1"; shift
+	echo "pkg: $*" >&2
+	exit "$code"
+}
+
+storage_ok() {
+	grep -q " $PKG_STORAGE_MOUNT " /proc/mounts || return 1
+	[ -d "$PKG_ROOT" ] || return 1
+}
+
+require_storage() {
+	storage_ok || die_code 2 "storage not available: $PKG_STORAGE_MOUNT is not mounted"
+}
+
+init_db_dirs() {
+	mkdir -p "$PKG_DB" "$PKG_JOURNAL" || die "cannot create database directories under $PKG_ROOT"
+}
+
+acquire_lock() {
+	local attempts=0
+	while ! mkdir "$PKG_LOCK" 2>/dev/null; do
+		attempts=$((attempts + 1))
+		[ "$attempts" -ge 10 ] && die "another pkg operation is in progress (lock: $PKG_LOCK)"
+		sleep 1
+	done
+}
+
+release_lock() {
+	rmdir "$PKG_LOCK" 2>/dev/null
+}
+
+cleanup_tmpdir() {
+	[ -n "$_PKG_TMPDIR" ] && rm -rf "$_PKG_TMPDIR"
+	_PKG_TMPDIR=
+}
+
+make_tmpdir() {
+	_PKG_TMPDIR=$(mktemp -d "/tmp/pkg.XXXXXX") || die "cannot create temporary directory"
+	chmod 700 "$_PKG_TMPDIR"
+}
+
+ctrl_get() {
+	local field="$1" file="$2"
+	sed -n "s/^${field}: //p" "$file" | head -1
+}
+
+# ---------------------------------------------------------------------------
+# pkg status
+# ---------------------------------------------------------------------------
+
+cmd_status() {
+	echo "Freetz-NG Runtime Package Manager $PKG_VERSION"
+	echo "Package root  : $PKG_ROOT"
+	echo "Storage mount : $PKG_STORAGE_MOUNT"
+	if grep -q " $PKG_STORAGE_MOUNT " /proc/mounts 2>/dev/null; then
+		echo "Storage state : mounted"
+	else
+		echo "Storage state : NOT MOUNTED"
+	fi
+	if [ -d "$PKG_DB" ]; then
+		local count
+		count=$(ls "$PKG_DB" 2>/dev/null | wc -l | tr -d ' ')
+		echo "Database      : ok ($count package(s) installed)"
+	else
+		echo "Database      : not initialised"
+	fi
+	echo "Target arch   : $PKG_ARCH"
+}
+
+# ---------------------------------------------------------------------------
+# pkg list
+# ---------------------------------------------------------------------------
+
+cmd_list() {
+	require_storage
+	if [ ! -d "$PKG_DB" ] || [ -z "$(ls "$PKG_DB" 2>/dev/null)" ]; then
+		echo "No packages installed."
+		return 0
+	fi
+	printf "%-24s %s\n" "Name" "Version"
+	printf "%-24s %s\n" "------------------------" "-------"
+	for ctrl in "$PKG_DB"/*/control; do
+		[ -f "$ctrl" ] || continue
+		local name version
+		name=$(ctrl_get Name "$ctrl")
+		version=$(ctrl_get Version "$ctrl")
+		printf "%-24s %s\n" "$name" "$version"
+	done
+}
+
+# ---------------------------------------------------------------------------
+# pkg info <name>
+# ---------------------------------------------------------------------------
+
+cmd_info() {
+	[ -n "$1" ] || die "usage: pkg info <name>"
+	require_storage
+	local ctrl="$PKG_DB/$1/control"
+	[ -f "$ctrl" ] || die_code 3 "package not installed: $1"
+	cat "$ctrl"
+	echo ""
+	echo "Installed-Files:"
+	cat "$PKG_DB/$1/manifest" 2>/dev/null || true
+}
+
+# ---------------------------------------------------------------------------
+# Archive validation helpers
+# ---------------------------------------------------------------------------
+
+validate_archive_paths() {
+	local archive="$1"
+	local bad
+	bad=$(tar tzf "$archive" 2>/dev/null | grep -E '^/|/\.\.$|/\.\./|\.\./|^\.\.$')
+	if [ -n "$bad" ]; then
+		echo "$bad"
+		return 1
+	fi
+	return 0
+}
+
+validate_data_special_files() {
+	local datadir="$1"
+	local bad
+	bad=$(find "$datadir" \( -type c -o -type b \) 2>/dev/null | head -1)
+	[ -z "$bad" ] || return 1
+	return 0
+}
+
+verify_manifest() {
+	local tmpdir="$1"
+	local manifest="$tmpdir/CONTROL/manifest"
+	local datadir="$tmpdir/data"
+	local ok=0
+	while IFS= read -r line; do
+		[ -z "$line" ] && continue
+		local expected_hash filepath
+		expected_hash=$(echo "$line" | awk '{print $1}')
+		filepath=$(echo "$line" | awk '{print $2}')
+		# filepath is like ./bin/hello → strip leading ./
+		filepath="${filepath#./}"
+		local fullpath="$datadir/$filepath"
+		if [ ! -f "$fullpath" ]; then
+			echo "pkg: manifest entry missing from archive: $filepath" >&2
+			ok=1
+			continue
+		fi
+		local actual_hash
+		actual_hash=$(sha256sum "$fullpath" | awk '{print $1}')
+		if [ "$actual_hash" != "$expected_hash" ]; then
+			echo "pkg: digest mismatch for $filepath" >&2
+			echo "pkg:   expected $expected_hash" >&2
+			echo "pkg:   actual   $actual_hash" >&2
+			ok=1
+		fi
+	done < "$manifest"
+	return $ok
+}
+
+check_space() {
+	local target_dir="$1"
+	local source_dir="$2"
+	local needed_kb available_kb
+	needed_kb=$(du -sk "$source_dir" 2>/dev/null | awk '{print $1}')
+	available_kb=$(df -k "$target_dir" 2>/dev/null | awk 'NR==2{print $4}')
+	if [ -n "$needed_kb" ] && [ -n "$available_kb" ]; then
+		[ "$available_kb" -gt "$needed_kb" ] || return 1
+	fi
+	return 0
+}
+
+# ---------------------------------------------------------------------------
+# pkg install <file.fpkg>
+# ---------------------------------------------------------------------------
+
+cmd_install() {
+	[ -n "$1" ] || die "usage: pkg install <file.fpkg>"
+	local archive="$1"
+	[ -f "$archive" ] || die "archive not found: $archive"
+
+	require_storage
+	init_db_dirs
+	acquire_lock
+
+	make_tmpdir
+	local tmpdir="$_PKG_TMPDIR"
+
+	_cleanup_install() {
+		cleanup_tmpdir
+		release_lock
+	}
+
+	# Step 1: check for dangerous paths before extraction
+	local bad_paths
+	bad_paths=$(validate_archive_paths "$archive")
+	if [ $? -ne 0 ]; then
+		echo "pkg: rejected: dangerous paths in archive:" >&2
+		echo "$bad_paths" >&2
+		_cleanup_install; exit 4
+	fi
+
+	# Step 2: extract to temp dir
+	if ! tar xzf "$archive" -C "$tmpdir" 2>/dev/null; then
+		echo "pkg: rejected: cannot extract archive (corrupt or not a .fpkg)" >&2
+		_cleanup_install; exit 4
+	fi
+
+	# Step 3: validate structure
+	if [ ! -f "$tmpdir/CONTROL/control" ]; then
+		echo "pkg: rejected: missing CONTROL/control" >&2
+		_cleanup_install; exit 4
+	fi
+	if [ ! -f "$tmpdir/CONTROL/manifest" ]; then
+		echo "pkg: rejected: missing CONTROL/manifest" >&2
+		_cleanup_install; exit 4
+	fi
+	if [ ! -d "$tmpdir/data" ]; then
+		echo "pkg: rejected: missing data/ directory" >&2
+		_cleanup_install; exit 4
+	fi
+
+	# Step 4: parse and validate control fields
+	local name version format_ver arch
+	name=$(ctrl_get Name "$tmpdir/CONTROL/control")
+	version=$(ctrl_get Version "$tmpdir/CONTROL/control")
+	format_ver=$(ctrl_get FormatVersion "$tmpdir/CONTROL/control")
+	arch=$(ctrl_get Arch "$tmpdir/CONTROL/control")
+
+	[ -n "$name" ]       || { echo "pkg: rejected: missing Name field" >&2;          _cleanup_install; exit 4; }
+	[ -n "$version" ]    || { echo "pkg: rejected: missing Version field" >&2;       _cleanup_install; exit 4; }
+	[ -n "$format_ver" ] || { echo "pkg: rejected: missing FormatVersion field" >&2; _cleanup_install; exit 4; }
+	[ -n "$arch" ]       || { echo "pkg: rejected: missing Arch field" >&2;          _cleanup_install; exit 4; }
+
+	# validate name is sane (alphanumeric, dash, underscore)
+	case "$name" in
+		*[!a-zA-Z0-9_-]*) echo "pkg: rejected: invalid package name: $name" >&2; _cleanup_install; exit 4 ;;
+	esac
+
+	# Step 5: compatibility checks
+	if [ "$format_ver" != "$PKG_FORMAT_VERSION" ]; then
+		echo "pkg: rejected: unsupported package format version $format_ver (expected $PKG_FORMAT_VERSION)" >&2
+		_cleanup_install; exit 4
+	fi
+	if [ "$arch" != "$PKG_ARCH" ]; then
+		echo "pkg: rejected: incompatible architecture $arch (this system: $PKG_ARCH)" >&2
+		_cleanup_install; exit 4
+	fi
+
+	# Step 6: check already installed
+	if [ -d "$PKG_DB/$name" ]; then
+		local installed_version
+		installed_version=$(ctrl_get Version "$PKG_DB/$name/control")
+		echo "pkg: error: $name $installed_version is already installed; remove it first" >&2
+		_cleanup_install; exit 5
+	fi
+
+	# Step 7: check for special files (device nodes, etc.)
+	if ! validate_data_special_files "$tmpdir/data"; then
+		echo "pkg: rejected: archive contains device nodes or other special files" >&2
+		_cleanup_install; exit 4
+	fi
+
+	# Step 8: verify manifest digests
+	if ! verify_manifest "$tmpdir"; then
+		echo "pkg: rejected: digest verification failed" >&2
+		_cleanup_install; exit 4
+	fi
+
+	# Step 9: disk space check
+	if ! check_space "$PKG_ROOT" "$tmpdir/data"; then
+		echo "pkg: error: insufficient disk space on $PKG_STORAGE_MOUNT" >&2
+		_cleanup_install; exit 1
+	fi
+
+	# Step 10: write transaction journal (before any mutation)
+	local journal="$PKG_JOURNAL/${name}.in-progress"
+	printf 'action=install\nname=%s\nversion=%s\narch=%s\n' \
+		"$name" "$version" "$arch" > "${journal}.tmp"
+	mv "${journal}.tmp" "$journal"
+
+	# Step 11: install payload files
+	# Use a temp error file to communicate failure from the piped subshell
+	local err_file="$tmpdir/.err"
+	find "$tmpdir/data" -mindepth 1 | while IFS= read -r src; do
+		local rel="${src#${tmpdir}/data/}"
+		local dst="$PKG_ROOT/$rel"
+		if [ -d "$src" ]; then
+			mkdir -p "$dst" 2>/dev/null || { echo fail > "$err_file"; break; }
+		else
+			mkdir -p "${dst%/*}" 2>/dev/null || { echo fail > "$err_file"; break; }
+			cp "$src" "${dst}.tmp" 2>/dev/null || { echo fail > "$err_file"; break; }
+			mv "${dst}.tmp" "$dst" 2>/dev/null || { echo fail > "$err_file"; break; }
+		fi
+	done
+	if [ -f "$err_file" ]; then
+		echo "pkg: error: write failure during installation; package may be partially installed" >&2
+		echo "pkg: transaction journal preserved at $journal for recovery" >&2
+		_cleanup_install; exit 1
+	fi
+
+	# Step 12: write database record (atomic)
+	mkdir -p "$PKG_DB/$name"
+	cp "$tmpdir/CONTROL/control" "$PKG_DB/$name/control.tmp"
+	mv "$PKG_DB/$name/control.tmp" "$PKG_DB/$name/control"
+	cp "$tmpdir/CONTROL/manifest" "$PKG_DB/$name/manifest.tmp"
+	mv "$PKG_DB/$name/manifest.tmp" "$PKG_DB/$name/manifest"
+
+	# Step 13: remove transaction journal
+	rm -f "$journal"
+
+	echo "pkg: installed $name $version"
+	_cleanup_install
+}
+
+# ---------------------------------------------------------------------------
+# pkg remove <name>
+# ---------------------------------------------------------------------------
+
+cmd_remove() {
+	[ -n "$1" ] || die "usage: pkg remove <name>"
+	local name="$1"
+
+	require_storage
+	local ctrl="$PKG_DB/$name/control"
+	[ -f "$ctrl" ] || die_code 3 "package not installed: $name"
+
+	local version
+	version=$(ctrl_get Version "$ctrl")
+
+	acquire_lock
+
+	local journal="$PKG_JOURNAL/${name}.removing"
+	printf 'action=remove\nname=%s\nversion=%s\n' "$name" "$version" \
+		> "${journal}.tmp"
+	mv "${journal}.tmp" "$journal"
+
+	local manifest="$PKG_DB/$name/manifest"
+	if [ -f "$manifest" ]; then
+		while IFS= read -r line; do
+			[ -z "$line" ] && continue
+			local filepath
+			filepath=$(echo "$line" | awk '{print $2}')
+			filepath="${filepath#./}"
+			local fullpath="$PKG_ROOT/$filepath"
+			[ -f "$fullpath" ] && rm -f "$fullpath"
+		done < "$manifest"
+		# remove empty directories left behind (best-effort)
+		find "$PKG_ROOT" -mindepth 1 -type d -empty 2>/dev/null | sort -r | while IFS= read -r d; do
+			case "$d" in
+				"$PKG_ROOT/database"|"$PKG_ROOT/database/"*|"$PKG_ROOT/cache") continue ;;
+			esac
+			rmdir "$d" 2>/dev/null || true
+		done
+	fi
+
+	rm -rf "$PKG_DB/$name"
+	rm -f "$journal"
+
+	echo "pkg: removed $name $version"
+	release_lock
+}
+
+# ---------------------------------------------------------------------------
+# Usage
+# ---------------------------------------------------------------------------
+
+usage() {
+	cat >&2 <<'EOF'
+Usage: pkg <command> [options]
+
+Commands:
+  status            Show manager version, storage state, database health
+  list              List installed packages
+  info <name>       Show metadata for an installed package
+  install <file>    Install a .fpkg package archive from a local file
+  remove <name>     Remove an installed package
+  help              Show this help text
+
+Exit codes:
+  0  success
+  1  error
+  2  storage not available
+  3  package not found
+  4  integrity or compatibility error
+  5  conflict or ownership error
+EOF
+}
+
+# ---------------------------------------------------------------------------
+# Main dispatch
+# ---------------------------------------------------------------------------
+
+case "$1" in
+	status)  cmd_status ;;
+	list)    cmd_list ;;
+	info)    shift; cmd_info "$@" ;;
+	install) shift; cmd_install "$@" ;;
+	remove)  shift; cmd_remove "$@" ;;
+	help|--help|-h) usage; exit 0 ;;
+	*) usage; exit 1 ;;
+esac

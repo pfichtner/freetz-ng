@@ -1,0 +1,9 @@
+config FREETZ_PACKAGE_HELLO_PKG
+	bool "hello-pkg (runtime package test fixture)"
+	default n
+	depends on FREETZ_PACKAGE_PKGMANAGER
+	help
+		Minimal test package for the Freetz-NG runtime package manager.
+		Installs a 'hello' script under the package root.
+		Use 'pkg install' to install the resulting .fpkg archive.
+

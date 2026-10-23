@@ -1,0 +1,60 @@
+#!/bin/sh
+
+DAEMON=pkgmanager
+CONF_NAME=pkgmanager
+. /etc/init.d/modlibrc
+
+PKG_CONFIG=/mod/etc/conf/pkgmanager.cfg
+[ -r "$PKG_CONFIG" ] && . "$PKG_CONFIG"
+: "${PKG_ROOT:=/var/media/ftp/uStor01/pkgroot}"
+: "${PKG_STORAGE_MOUNT:=/var/media/ftp/uStor01}"
+
+: "${PROFILE_SCRIPT:=/mod/etc/profile.d/pkgmanager.sh}"
+
+start() {
+	if ! grep -q " $PKG_STORAGE_MOUNT " /proc/mounts 2>/dev/null; then
+		loglib_system "$DAEMON" "storage not mounted at $PKG_STORAGE_MOUNT; skipping PATH setup"
+		return 0
+	fi
+	mkdir -p "$PKG_ROOT/bin" "$PKG_ROOT/sbin"
+	mkdir -p "${PROFILE_SCRIPT%/*}"
+	printf 'export PATH="%s/bin:%s/sbin:$PATH"\n' "$PKG_ROOT" "$PKG_ROOT" \
+		> "$PROFILE_SCRIPT"
+	loglib_system "$DAEMON" "package root $PKG_ROOT added to PATH"
+}
+
+stop() {
+	rm -f "$PROFILE_SCRIPT"
+}
+
+status() {
+	if [ -d "$PKG_ROOT" ] && grep -q " $PKG_STORAGE_MOUNT " /proc/mounts 2>/dev/null; then
+		echo "running"
+	else
+		echo "stopped"
+	fi
+}
+
+case $1 in
+	""|load)
+		modreg file pkgmanager pkgmanager "Package Manager" 0 pkgmanager
+		;;
+	unload)
+		modunreg file pkgmanager
+		;;
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	status)
+		status
+		;;
+	*)
+		echo "Usage: $0 [start|stop|status]" >&2
+		exit 1
+		;;
+esac
+
+exit 0
